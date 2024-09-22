@@ -43,7 +43,7 @@ function leastprt(ped, A, K; least=20)
         ix = findall(c .> 0) # indices of ID of next round
         if length(ix) < least
             ix = setdiff(1:length(c), findmin(c)[2])
-            length(ix) < least && (ix = 1:length(id))
+            length(ix) < least && (ix = eachindex(id))
         end
         if length(ix) == length(id) || itr > 1000
             rc = zeros(nid)

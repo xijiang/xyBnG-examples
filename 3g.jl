@@ -62,7 +62,7 @@ function fewer_chrs(;
         lmp.chip = lmp.chip .&& .!lmp[!, trait.name] .&& .!lmp[!, "dark"]
         lmp.dark = lmp.dark .&& .!lmp[!, trait.name]
 
-        #= GBLUP
+        # GBLUP
         foo, bar = "$tag-rand", "$tag-gblup"
         gblup(test, foo, bar, lmp, nsel, trait, fixed, plan; ε = ε)
         summary = xysum("$test/$bar.ped", "$test/$bar.xy", lmp, trait)
@@ -71,13 +71,6 @@ function fewer_chrs(;
         # GG-OCS
         foo, bar = "$tag-rand", "$tag-ggocs"
         ggocs(test, foo, bar, lmp, nsel, trait, fixed, pln2, dF, F0; ε = ε)
-        summary = xysum("$test/$bar.ped", "$test/$bar.xy", lmp, trait)
-        savesum(sumfile, summary)
-        
-        =#
-        ## II-OCS
-        foo, bar = "$tag-rand", "$tag-iiocs"
-        iiocs(test, foo, bar, lmp, nsel, trait, fixed, pln2, dF, F0; ε = ε)
         summary = xysum("$test/$bar.ped", "$test/$bar.xy", lmp, trait)
         savesum(sumfile, summary)
     end
