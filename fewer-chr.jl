@@ -5,6 +5,8 @@ using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase
+import xyBnG.Breeding: phenotype!, Predict!, Select, reproduce!
+import xyBnG.RS: nrm, irm, grm, xirm
 
 include("gblup.jl")
 include("ggocs.jl")
