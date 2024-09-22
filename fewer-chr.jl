@@ -8,13 +8,13 @@ import xyBnG.xps: initPop, chkbase
 import xyBnG.Breeding: phenotype!, Predict!, Select, reproduce!
 import xyBnG.RS: nrm, irm, grm, xirm
 
-include("gblup.jl")
-include("ggocs.jl")
-include("iiocs.jl")
-include("leastprt.jl")
+# include("gblup.jl")
+# include("ggocs.jl")
+# include("iiocs.jl")
+# include("leastprt.jl")
 
 function fewer_chrs(;
-    nchp = 32_000,
+    nchp = 5_100,
     nref = 1_100,
     base = "base/chr-1/tskit",
     rst = "rst",
@@ -62,7 +62,7 @@ function fewer_chrs(;
         lmp.chip = lmp.chip .&& .!lmp[!, trait.name] .&& .!lmp[!, "dark"]
         lmp.dark = lmp.dark .&& .!lmp[!, trait.name]
 
-        #= GBLUP
+        # GBLUP
         foo, bar = "$tag-rand", "$tag-gblup"
         gblup(test, foo, bar, lmp, nsel, trait, fixed, plan; ε = ε)
         summary = xysum("$test/$bar.ped", "$test/$bar.xy", lmp, trait)
@@ -74,7 +74,6 @@ function fewer_chrs(;
         summary = xysum("$test/$bar.ped", "$test/$bar.xy", lmp, trait)
         savesum(sumfile, summary)
         
-        =#
         ## II-OCS
         foo, bar = "$tag-rand", "$tag-iiocs"
         iiocs(test, foo, bar, lmp, nsel, trait, fixed, pln2, dF, F0; ε = ε)
