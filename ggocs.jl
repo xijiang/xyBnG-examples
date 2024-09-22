@@ -1,5 +1,5 @@
 """
-    ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0)
+    ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-6)
 Optimal contribution selection with `G` relationship matrix for both EBV and
 constraint on `foo`.xy and `foo`.ped in directory `test` for `ngn` generations.
 SNP linkage information are in DataFrame `lmp`. The results are saved in
@@ -15,7 +15,7 @@ option `ong` is set to `true`.
 See also [`randbrd`](@ref), [`aaocs`](@ref), [`iiocs`](@ref), [`iiocs`](@ref),
 [`agocs`](@ref), [`igocs`](@ref).
 """
-function ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0)
+function ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F; ε = 1e-6)
     @info "  - Directional selection GGOCS for $ngn generations"
     ped, xy = deserialize("$test/$foo.ped"), "$test/$bar.xy"
     cp("$test/$foo.xy", xy, force=true)
@@ -23,7 +23,7 @@ function ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0)
         print(" $ign")
         ids = view(ped, ped.grt .== ped.grt[end], :id)
         phenotype!(ids, ped, trait)
-        G = grm(xy, lmp.chip, lmp.frq)
+        G = grm(xy, lmp.chip, lmp.frq) + I * ε
         giv = inv(G)
         Predict!(ids, ped, fixed, giv, trait)
         g22 = G[ids, ids]

@@ -1,5 +1,5 @@
 """
-    gblup(test, foo, bar, lmp, ngn, trait, fixed, plan)
+    gblup(test, foo, bar, lmp, ngn, trait, fixed, plan; ε = 1e-6)
 Directional selection with `G` relationship matrix for EBV on `foo`.xy and
 `foo`.ped in directory `test` for `ngn` generations. SNP linkage information are
 in DataFrame `lmp`. The results are saved in `bar`.xy, `bar`.ped in directory
@@ -9,7 +9,7 @@ the selection plan `plan`.
 
 See also [`ablup`](@ref), [`iblup`](@ref).
 """
-function gblup(test, foo, bar, lmp, ngn, trait, fixed, plan)
+function gblup(test, foo, bar, lmp, ngn, trait, fixed, plan; ε = 1e-6)
     @info "  - Directional selection GBLUP for $ngn generations"
     ped, xy = deserialize("$test/$foo.ped"), "$test/$bar.xy"
     cp("$test/$foo.xy", xy, force=true)
@@ -17,7 +17,7 @@ function gblup(test, foo, bar, lmp, ngn, trait, fixed, plan)
         print(" $ign")
         ids = view(ped, ped.grt .== ped.grt[end], :id)
         phenotype!(ids, ped, trait)
-        G = grm(xy, lmp.chip, lmp.frq)
+        G = grm(xy, lmp.chip, lmp.frq) + I * ε
         giv = inv(G)
         Predict!(ids, ped, fixed, giv, trait)
         ng = Select(ids, plan, ped, trait)

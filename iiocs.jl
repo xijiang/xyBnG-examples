@@ -31,7 +31,7 @@ function iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0)
         Predict!(ids, ped, fixed, giv, trait)
         g22 = G[ids, ids]
         mid = size(ped, 1)
-        ng = Select(ids, plan, ped, g22, trait, dF, ign; F0=F0)
+        ng = Select(ids, plan, ped, g22, trait, dF, ign; F0=F0, ocs=leastprt)
         reproduce!(ng, ped, xy, lmp, trait)
         G = xirm(G, xy, lmp.chip, mid, size(ped, 1))
     end

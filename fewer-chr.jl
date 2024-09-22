@@ -1,9 +1,15 @@
 using DataFrames
+using LinearAlgebra
 using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase
+
+include("gblup.jl")
+include("ggocs.jl")
+include("iiocs.jl")
+include("leastprt.jl")
 
 function fewer_chrs(;
     nchp = 32_000,
