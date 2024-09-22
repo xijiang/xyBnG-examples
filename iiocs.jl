@@ -1,5 +1,5 @@
 """
-    iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0)
+    iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-6)
 Optimal contribution selection with `IBD` relationship matrix for both EBV and
 constraint on `foo`.xy and `foo`.ped in directory `test` for `ngn` generations.
 SNP linkage information are in DataFrame `lmp`. The results are saved in
@@ -10,7 +10,7 @@ DataFrame. Parents are sampled according to `plan`. The constraint ΔF is `dF`.
 
 This function uses the TM1997 algorithm for OCS.
 """
-function iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0)
+function iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-6)
     @info "  - Directional selection IIOCS for $ngn generations"
     ped, xy = deserialize("$test/$foo.ped"), "$test/$bar.xy"
     cp("$test/$foo.xy", xy, force=true)

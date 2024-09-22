@@ -15,7 +15,7 @@ option `ong` is set to `true`.
 See also [`randbrd`](@ref), [`aaocs`](@ref), [`iiocs`](@ref), [`iiocs`](@ref),
 [`agocs`](@ref), [`igocs`](@ref).
 """
-function ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F; ε = 1e-6)
+function ggocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-6)
     @info "  - Directional selection GGOCS for $ngn generations"
     ped, xy = deserialize("$test/$foo.ped"), "$test/$bar.xy"
     cp("$test/$foo.xy", xy, force=true)
