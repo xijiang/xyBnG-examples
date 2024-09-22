@@ -3,7 +3,7 @@ using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: savepar, initPop, chkbase
+import xyBnG.xps: initPop, chkbase
 
 function fewer_chrs(;
     nchp = 32_000,
