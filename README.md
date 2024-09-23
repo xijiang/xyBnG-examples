@@ -1,10 +1,14 @@
 # Package xyBnG examples
 
+## Introduction
+
 This repository contains examples of the package `xyBnG`. The package `xyBnG` is a Julia package for simulations of complicate breeding schemes. The package xyBnG is available at https://github.com/xijiang/xyBnG.jl.
 
 I haven't register it as a standard Julia package yet. This will be done when I feel comfortable with the package. You can add it by the URL of the package repository. 
 
 This repo, i.e., `xyBnG_examples`, contains examples of using the package `xyBnG`. One need to install the package `xyBnG` before running these examples.
+
+The files here come and go. 'Good' examples will be moved to the package repository.
 
 ## `pgsnp.jl`
 

@@ -1,10 +1,10 @@
 using DataFrames
+using LinearAlgebra
 using Serialization
 using xyBnG
-import xyBnG.Sum: xysum, savesum, cormat
+import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: gblup, ablup, iblup, aaocs, iiocs, ggocs, agocs, igocs
-import xyBnG.xps: savepar, initPop
+import xyBnG.xps: initPop, chkbase, ablup, gblup, iblup, aaocs, ggocs, iiocs, agocs, igocs
 
 """
     pgsnp(; data = "pgsnp", rst = "rst", nrpt = 1)
@@ -18,24 +18,32 @@ Suppose you are in a working directory ``dir``. This file ``pgsnp.jl`` is in
 - Date: 2024-08-27, works ok with xyBnG v1.2.4
 """
 function pgsnp(;
-    nchp = 8000,
-    nref = 1000,
+    nchp = 600,
+    nref = 1_000,
     rst = "rst",
-    trait = Trait("growth", 0.1, 1_000),
-    nchr = 2,
+    trait = Trait("growth", 0.25, 1_000),
+    nchr = 1,
     nrpt = 1,
+    nsel = 30,
+    nrng = 5,
+    ne = 200,
+    maf = 0.0,
+    dF = 0.011,
+    hist = 5000,
+    mr = 4.0
 )
-    sdir = @__DIR__
+    sdir = @__DIR__  # directory of this script
     if !isfile("pgsnp")
+        @info "Compile pgsnp.cpp"
         run(`g++ -Wall -O3 --std=c++11 -pthread -o $sdir/pgsnp $sdir/pgsnp.cpp`)
     end
     1 ≤ nchr ≤ 29 || (nchr = 1)
-    species = Cattle(240)
-    nrng, nsel, maf, dF, hist, mr = 5, 20, 0.0, 0.011, 5000, 1.0
-    plan, fixed = Plan(25, 50, 200), ["grt"]
+    species = Cattle(ne)
+    plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
     CULLS = (gblup, ablup, iblup)
     OCSS = (aaocs, iiocs, ggocs, agocs, igocs)
-
+    rst = abspath("../$rst")
+    
     isdir(rst) && rm(rst, force = true, recursive = true)
     mkpath(rst)
     scenario = (
@@ -57,9 +65,8 @@ function pgsnp(;
         Schemes = union(CULLS, OCSS),
     )
     savepar(scenario, "$rst/scenario.par")
-
+    
     npd = ndigits(nrpt)
-    pln2 = Plan(50, 50, 200)
     chrln = [
         1.58,
         1.36,
@@ -90,7 +97,7 @@ function pgsnp(;
         0.46,
         0.51,
     ]
-    open("rst/desc.txt", "w") do io
+    open("$rst/desc.txt", "w") do io
         println(io, "BosTau")
         println(io, species.nid)
     end
@@ -115,7 +122,7 @@ function pgsnp(;
         end
         for scheme in OCSS
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
-            scheme(rst, foo, bar, lmp, nsel, trait, fixed, pln2, dF, F0)
+            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
             savesum("$rst/summary.ser", summary)
         end
