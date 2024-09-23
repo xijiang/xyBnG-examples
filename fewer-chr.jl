@@ -4,14 +4,13 @@ using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: initPop, chkbase
+import xyBnG.xps: initPop, chkbase, ggocs, gblup
 import xyBnG.Breeding: phenotype!, Predict!, Select, reproduce!
 import xyBnG.RS: nrm, irm, grm, xirm
 
 # include("gblup.jl")
 # include("ggocs.jl")
-# include("iiocs.jl")
-# include("leastprt.jl")
+include("iiocs.jl")
 
 function fewer_chrs(;
     nchp = 5_100,

@@ -10,8 +10,6 @@ import xyBnG.RS: nrm, irm, grm, xirm
 
 include("gblup.jl")
 include("ggocs.jl")
-include("iiocs.jl")
-include("leastprt.jl")
 
 function fewer_chrs(;
     nchp = 32_000,

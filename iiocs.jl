@@ -10,18 +10,17 @@ DataFrame. Parents are sampled according to `plan`. The constraint ΔF is `dF`.
 
 This function uses the TM1997 algorithm for OCS.
 """
-function iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-6)
-    @info "  - Directional selection IIOCS for $ngn generations"
+function iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-4)
+    @info "  - Directional selection IIOCS for $ngn generations, $ε"
     ped, xy = deserialize("$test/$foo.ped"), "$test/$bar.xy"
     cp("$test/$foo.xy", xy, force=true)
     G = nothing
     if isfile("$test/$foo.irm")
         G = zeros(size(ped, 1), size(ped, 1))
         read!("$test/$foo.irm", G)
-        G += ε * I
     else
         @info "  - Calculating IBD relationship matrix"
-        G = irm(xy, lmp.chip, 1:size(ped, 1))
+        G = irm(xy, lmp.chip, 1:size(ped, 1)) + ε * I
         write("$test/$foo.irm", G)
     end
     for ign = 1:ngn
@@ -32,10 +31,10 @@ function iiocs(test, foo, bar, lmp, ngn, trait, fixed, plan, dF, F0; ε = 1e-6)
         Predict!(ids, ped, fixed, giv, trait)
         g22 = G[ids, ids]
         mid = size(ped, 1)
-        ng = Select(ids, plan, ped, g22, trait, dF, ign; F0=F0, ocs=leastprt)
+        ng = Select(ids, plan, ped, g22, trait, dF, ign; F0=F0)
         reproduce!(ng, ped, xy, lmp, trait)
         G = xirm(G, xy, lmp.chip, mid, size(ped, 1))
-        for i in mid:size(G, 1)
+        for i in mid+1:size(G, 1)
             G[i, i] += ε
         end
     end
