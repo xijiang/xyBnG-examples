@@ -20,7 +20,7 @@ Suppose you are in a working directory ``dir``. This file ``pgsnp.jl`` is in
 function pgsnp(;
     nchp = 600,
     nref = 1_000,
-    rst = "rst",
+    rst = "1-chr-pgsnp",
     trait = Trait("growth", 0.25, 1_000),
     nchr = 1,
     nrpt = 1,
@@ -30,10 +30,10 @@ function pgsnp(;
     maf = 0.0,
     dF = 0.011,
     hist = 5000,
-    mr = 4.0
+    mr = 4.0,
 )
-    sdir = @__DIR__  # directory of this script
-    if !isfile("pgsnp")
+    sdir = @__DIR__
+    if !isfile("$sdir/pgsnp")
         @info "Compile pgsnp.cpp"
         run(`g++ -Wall -O3 --std=c++11 -pthread -o $sdir/pgsnp $sdir/pgsnp.cpp`)
     end
@@ -42,8 +42,8 @@ function pgsnp(;
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
     CULLS = (gblup, ablup, iblup)
     OCSS = (aaocs, iiocs, ggocs, agocs, igocs)
-    rst = abspath("../$rst")
-    
+    rst = abspath(rst)
+
     isdir(rst) && rm(rst, force = true, recursive = true)
     mkpath(rst)
     scenario = (
@@ -65,7 +65,7 @@ function pgsnp(;
         Schemes = union(CULLS, OCSS),
     )
     savepar(scenario, "$rst/scenario.par")
-    
+
     npd = ndigits(nrpt)
     chrln = [
         1.58,
@@ -113,7 +113,9 @@ function pgsnp(;
         fxy = "$rst/$(species.name).xy"
         fmp = "$rst/$(species.name).lmp"
         lmp, F0 = initPop(fxy, fmp, rst, plan, maf, nchp, nref, nrng, trait, tag)
-        lmp.chip = lmp.chip .&& .!lmp[!, trait.name] # exclude QTL from chip
+        lmp.chip = lmp.chip .&& .!lmp[!, trait.name] .&& .!lmp[!, "dark"]
+        lmp.dark = lmp.dark .&& .!lmp[!, trait.name]
+
         for scheme in CULLS
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
             scheme(rst, foo, bar, lmp, nsel, trait, fixed, plan)
