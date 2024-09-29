@@ -17,7 +17,7 @@ Suppose you are in a working directory ``dir``. This file ``pgsnp.jl`` is in
 
 - Date: 2024-08-27, works ok with xyBnG v1.2.4
 """
-function pgsnp(chr...;
+function pgsnp(chr;
     nchp = 600,
     nref = 1_000,
     rst = "1-chr-pgsnp",
@@ -73,12 +73,8 @@ function pgsnp(chr...;
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
         @info "  - Prepare a founder population"
-        i = 0
-        Threads.@threads for c ∈ chr
-            i += 1
-            cmd = `$sdir/pgsnp $(species.nid) $hist $c $mr`
-            run(pipeline(cmd, stdout = "$rst/chr.$i", stderr = devnull))
-        end
+        cmd = `$sdir/pgsnp $(species.nid) $hist $chr $mr`
+        run(pipeline(cmd, stdout = "$rst/chr.1", stderr = devnull))
         xyBnG.Conn.PG.toxy("$rst")
         fxy = "$rst/$(species.name).xy"
         fmp = "$rst/$(species.name).lmp"
