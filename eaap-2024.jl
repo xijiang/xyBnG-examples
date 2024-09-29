@@ -8,7 +8,7 @@ import xyBnG.xps: initPop, chkbase, ablup, gblup, iblup, aaocs, ggocs, iiocs, ag
 
 function eaap(;
     rst = "eaap",
-    base = "tskit",
+    base = "base/tskit",
     species = Cattle(5_000),
     trait = Trait("growth", 0.25, 10_000),
     nchp = 50_000,
@@ -19,9 +19,9 @@ function eaap(;
     fixed = ["grt"],
     dF = 0.011,
     nrpt = 1,
-) 
+)
+    base, rst = abspath(base), abspath(rst)
     isdir(rst) && rm(rst, force = true, recursive = true)
-    base = abspath("../base/$base")
     mkpath(rst)
     CULLS = (gblup, ablup, iblup)
     OCSS = (aaocs, iiocs, ggocs, agocs, igocs)
@@ -63,13 +63,13 @@ function eaap(;
 
         # gblup
         foo, bar = "$tag-rand", "$tag-gblup"
-        gblup(rst, foo, bar, lmp, nsel, trait, fixed, plan; ε = 0.)
+        gblup(rst, foo, bar, lmp, nsel, trait, fixed, plan; ε = 0.0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
 
         # iblup
         foo, bar = "$tag-rand", "$tag-iblup"
-        iblup(rst, foo, bar, lmp, nsel, trait, fixed, plan; ε=0.0)
+        iblup(rst, foo, bar, lmp, nsel, trait, fixed, plan; ε = 0.0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
 

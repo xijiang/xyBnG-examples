@@ -17,12 +17,11 @@ Suppose you are in a working directory ``dir``. This file ``pgsnp.jl`` is in
 
 - Date: 2024-08-27, works ok with xyBnG v1.2.4
 """
-function pgsnp(;
+function pgsnp(chr...;
     nchp = 600,
     nref = 1_000,
     rst = "1-chr-pgsnp",
     trait = Trait("growth", 0.25, 1_000),
-    nchr = 1,
     nrpt = 1,
     nsel = 30,
     nrng = 5,
@@ -37,7 +36,6 @@ function pgsnp(;
         @info "Compile pgsnp.cpp"
         run(`g++ -Wall -O3 --std=c++11 -pthread -o $sdir/pgsnp $sdir/pgsnp.cpp`)
     end
-    1 ≤ nchr ≤ 29 || (nchr = 1)
     species = Cattle(ne)
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
     CULLS = (gblup, ablup, iblup)
@@ -52,7 +50,7 @@ function pgsnp(;
         History = hist,
         MutationRate = mr, # per 1e8 bp per meiosis
         Trait = trait,
-        Nchr = nchr, # = 1:29
+        Chr_len = chr,
         Nchp = nchp,
         Nref = nref,
         Nrng = nrng,
@@ -67,36 +65,6 @@ function pgsnp(;
     savepar(scenario, "$rst/scenario.par")
 
     npd = ndigits(nrpt)
-    chrln = [
-        1.58,
-        1.36,
-        1.21,
-        1.20,
-        1.18,
-        1.11,
-        1.13,
-        1.05,
-        1.03,
-        1.07,
-        0.87,
-        0.83,
-        0.82,
-        0.85,
-        0.81,
-        0.73,
-        0.66,
-        0.63,
-        0.71,
-        0.69,
-        0.61,
-        0.52,
-        0.62,
-        0.42,
-        0.52,
-        0.46,
-        0.46,
-        0.51,
-    ]
     open("$rst/desc.txt", "w") do io
         println(io, "BosTau")
         println(io, species.nid)
@@ -106,7 +74,7 @@ function pgsnp(;
         @info "==========> Repeat: $tag / $nrpt <=========="
         @info "  - Prepare a founder population"
         Threads.@threads for i ∈ 1:nchr
-            cmd = `$sdir/pgsnp $(species.nid) $hist $(chrln[i]) $mr`
+            cmd = `$sdir/pgsnp $(species.nid) $hist $(chr[i]) $mr`
             run(pipeline(cmd, stdout = "$rst/chr.$i", stderr = devnull))
         end
         xyBnG.Conn.PG.toxy("$rst")

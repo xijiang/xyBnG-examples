@@ -69,7 +69,7 @@ function fewer_chrs(;
             savesum("$rst/summary.ser", summary)
         end
     end
-    open("$rst/scenario.par", "w") do io
+    open("$rst/scenario.par", "a") do io
         println(io, "Ended: ", time())
     end
 end
