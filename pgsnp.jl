@@ -73,8 +73,8 @@ function pgsnp(chr...;
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
         @info "  - Prepare a founder population"
-        Threads.@threads for i ∈ 1:nchr
-            cmd = `$sdir/pgsnp $(species.nid) $hist $(chr[i]) $mr`
+        Threads.@threads for c ∈ chr
+            cmd = `$sdir/pgsnp $(species.nid) $hist $c $mr`
             run(pipeline(cmd, stdout = "$rst/chr.$i", stderr = devnull))
         end
         xyBnG.Conn.PG.toxy("$rst")
