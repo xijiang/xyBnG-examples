@@ -4,7 +4,7 @@ using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: initPop, chkbase, ablup, gblup, iblup, aaocs, ggocs, iiocs, agocs, igocs
+import xyBnG.xps: initPop, chkbase, ablup, gblup, iblup, aaocs, ggocs, iiocs, agocs, igocs, riocs
 
 """
     pgsnp(; data = "pgsnp", rst = "rst", nrpt = 1)

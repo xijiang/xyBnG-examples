@@ -140,5 +140,5 @@ function run_riocs()
     tsbs(nrpt = 20, nchp =  600, rst = "riocs/ts/5d")
     tsbs(nrpt = 20, nchp = 5100, rst = "riocs/ts/5k")
     pgbs(1.585; nrpt = 20, nchp =  600, rst = "riocs/pg/5d")
-    pgbs(1.585; nrpt = 20, nchp = 5100, rst = "riocs/pg/5d")
+    pgbs(1.585; nrpt = 20, nchp = 5100, rst = "riocs/pg/5k")
 end

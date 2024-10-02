@@ -4,13 +4,13 @@ using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: initPop, chkbase, ablup, gblup, iblup, aaocs, ggocs, iiocs, agocs, igocs, riocs
+import xyBnG.xps: initPop, chkbase, ggocs
 
-function fewer_chrs(;
+function oneocs(;
     nchp = 600,
     nref = 1_100,
     base = "base/chr-1/tskit",
-    rst = "1-chr-tskit",
+    rst = "quick-test",
     trait = Trait("growth", 0.25, 1_000),
     nrpt = 1,
     nsel = 30,
@@ -23,8 +23,6 @@ function fewer_chrs(;
     mkpath(test)
     species = Cattle(5000)
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
-    CULLS = (gblup, ablup, iblup)
-    OCSS = (aaocs, iiocs, ggocs, agocs, igocs)
     dF = 0.011
     scenario = (
         BaseDir = base,
@@ -40,7 +38,7 @@ function fewer_chrs(;
         Fixed = fixed,
         ΔF = dF,
         ε = ε,
-        Schemes = union(CULLS, OCSS),
+        Schemes = "ggocs",
         Nrpt = nrpt,
     )
     savepar(scenario, "$test/scenario.par")
@@ -56,18 +54,10 @@ function fewer_chrs(;
         lmp.chip = lmp.chip .&& .!lmp[!, trait.name] .&& .!lmp[!, "dark"]
         lmp.dark = lmp.dark .&& .!lmp[!, trait.name]
 
-        for scheme in CULLS
-            foo, bar = "$tag-rand", tag * '-' * string(scheme)
-            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plan)
-            summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-            savesum("$rst/summary.ser", summary)
-        end
-        for scheme in OCSS
-            foo, bar = "$tag-rand", tag * '-' * string(scheme)
-            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
-            summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-            savesum("$rst/summary.ser", summary)
-        end
+        foo, bar = "$tag-rand", "$tag-ggocs"
+        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
+        savesum("$rst/summary.ser", summary)
     end
     open("$rst/scenario.par", "a") do io
         println(io, "Ended: ", time())
