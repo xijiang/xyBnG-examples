@@ -24,6 +24,7 @@ function qtest(;
     species = Cattle(5000)
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
     dF = 0.011
+    OCSS = (riocs, ggocs)
     scenario = (
         BaseDir = base,
         TestDir = test,
@@ -34,11 +35,11 @@ function qtest(;
         MAF = maf,
         Nrng = nrng,
         Nsel = nsel,
-        Plan = plan,
+        Plan = plnb,
         Fixed = fixed,
         ΔF = dF,
         ε = ε,
-        Schemes = "ggocs",
+        Schemes = OCSS,
         Nrpt = nrpt,
     )
     savepar(scenario, "$test/scenario.par")
@@ -50,21 +51,23 @@ function qtest(;
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
         fxy, fmp = "$base/$(species.name).xy", "$base/$(species.name).lmp"
-        lmp, F0 = initPop(fxy, fmp, test, plan, maf, nchp, nref, nrng, trait, tag)
+        lmp, F0 = initPop(fxy, fmp, test, plnb, maf, nchp, nref, nrng, trait, tag)
         lmp.chip = lmp.chip .&& .!lmp[!, trait.name] .&& .!lmp[!, "dark"]
         lmp.dark = lmp.dark .&& .!lmp[!, trait.name]
 
+        # ggocs
         foo, bar = "$tag-rand", "$tag-ggocs"
-        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = 0.0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-        savesum(sumfile, summary)
+        savesum("$rst/summary.ser", summary)
 
+        # riocs
         foo, bar = "$tag-rand", "$tag-riocs"
-        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = 0.0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-        savesum(sumfile, summary)
+        savesum("$rst/summary.ser", summary)
     end
-    
+
     open("$rst/scenario.par", "a") do io
         println(io, "Ended: ", time())
     end
