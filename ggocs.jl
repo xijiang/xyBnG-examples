@@ -4,9 +4,9 @@ using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: initPop, chkbase, ggocs
+import xyBnG.xps: initPop, chkbase, ggocs, riocs
 
-function oneocs(;
+function qtest(;
     nchp = 600,
     nref = 1_100,
     base = "base/chr-1/tskit",
@@ -57,8 +57,14 @@ function oneocs(;
         foo, bar = "$tag-rand", "$tag-ggocs"
         ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-        savesum("$rst/summary.ser", summary)
+        savesum(sumfile, summary)
+
+        foo, bar = "$tag-rand", "$tag-riocs"
+        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
+        savesum(sumfile, summary)
     end
+    
     open("$rst/scenario.par", "a") do io
         println(io, "Ended: ", time())
     end
