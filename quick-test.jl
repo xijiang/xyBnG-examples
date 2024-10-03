@@ -57,13 +57,13 @@ function qtest(;
 
         # ggocs
         foo, bar = "$tag-rand", "$tag-ggocs"
-        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = 0.0)
+        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
 
         # riocs
         foo, bar = "$tag-rand", "$tag-riocs"
-        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = 0.0)
+        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
     end
