@@ -36,7 +36,7 @@ function qtest(;
         MAF = maf,
         Nrng = nrng,
         Nsel = nsel,
-        Plan = plnb,
+        Plan = plan,
         Fixed = fixed,
         ΔF = dF,
         ε = ε,
@@ -52,19 +52,19 @@ function qtest(;
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
         fxy, fmp = "$base/$(species.name).xy", "$base/$(species.name).lmp"
-        lmp, F0 = initPop(fxy, fmp, test, plnb, maf, nchp, nref, nrng, trait, tag)
+        lmp, F0 = initPop(fxy, fmp, test, plan, maf, nchp, nref, nrng, trait, tag)
         lmp.chip = lmp.chip .&& .!lmp[!, trait.name] .&& .!lmp[!, "dark"]
         lmp.dark = lmp.dark .&& .!lmp[!, trait.name]
 
         # ggocs
         foo, bar = "$tag-rand", "$tag-ggocs"
-        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plan, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
 
         # riocs
         foo, bar = "$tag-rand", "$tag-riocs"
-        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plan, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
     end
