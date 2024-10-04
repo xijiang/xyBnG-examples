@@ -12,6 +12,7 @@ function qtest(;
     base = "base/chr-1/tskit",
     rst = "quick-test",
     trait = Trait("growth", 0.25, 1_000),
+    plan = Plan(50, 50, 200),
     nrpt = 1,
     nsel = 30,
     nrng = 5,
@@ -22,7 +23,7 @@ function qtest(;
     isdir(test) && rm(test, force = true, recursive = true)
     mkpath(test)
     species = Cattle(5000)
-    plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
+    fixed = ["grt"]
     dF = 0.011
     OCSS = (riocs, ggocs)
     scenario = (
