@@ -30,7 +30,7 @@ function qpg(chr; rst = "", nrpt = 1)
     end
     # Simulation parameters
     nchr = length(chr)
-    ε = nchr == 1 ? 1e-6 : 0.0
+    ε = nchr == 5 ? 1e-6 : 0.0
     plan = Plan(25, 50, 200)
     nrng, nsel, maf, dF, hist, mr = 5, 30, 0.0, 0.011, 5000, 4.0
     species = Cattle(plan.noff)
