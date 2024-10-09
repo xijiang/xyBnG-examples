@@ -87,7 +87,7 @@ function qpg(chr; rst = "", nrpt = 1)
 
         # aaocs
         foo, bar = "$tag-rand", "$tag-aaocs"
-        ggocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        aaocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
 
@@ -105,7 +105,7 @@ function qpg(chr; rst = "", nrpt = 1)
 
         # iiocs
         foo, bar = "$tag-rand", "$tag-iiocs"
-        riocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = ε)
+        iiocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = ε)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum("$rst/summary.ser", summary)
     end
