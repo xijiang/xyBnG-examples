@@ -3,7 +3,7 @@ using Serialization
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
-import xyBnG.xps: initPop, chkbase, ggocs, riocs
+import xyBnG.xps: initPop, chkbase, ggocs, riocs, aaocs, iiocs
 
 
 function qtskit(cdir::Int; nrpt = 30)
@@ -13,8 +13,8 @@ function qtskit(cdir::Int; nrpt = 30)
     species = Cattle(5_000)
     lgnm = 24.89385779     # length of genome in Morgen
     base = "base/vchr/$cdir"
-    blm = deserialize("$base/vchr/$cdir/BosTau.lmp")
-    lng = combine(groupby(blm, :chr), :n => maximum => :len)
+    blm = deserialize("$base/BosTau.lmp")
+    lng = combine(groupby(blm, :chr), :pos => maximum => :len)
     rog = sum(lng.len) / lgnm / 1e8 # ratio of genome
     nchp = Int(round(5e4 * rog))
     nref = Int(round(1e4 * rog))
@@ -54,7 +54,7 @@ function qtskit(cdir::Int; nrpt = 30)
         fxy = "$base/BosTau.xy"
         fmp = "$base/BosTau.lmp"
         lmp, F0 = initPop(fxy, fmp, rst, plan, maf, nchp, nref, nrng, trait, tag)
-
+        
         # aaocs
         foo, bar = "$tag-rand", "$tag-aaocs"
         aaocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
