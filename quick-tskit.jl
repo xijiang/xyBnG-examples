@@ -19,7 +19,7 @@ function qtskit(cdir::Int; nrpt = 30)
     nchp = Int(round(5e4 * rog))
     nref = Int(round(1e4 * rog))
     trait = Trait("growth", 0.25 * rog, nref) # nqtl = nref
-    OOCS = (aaocs, iiocs, ggocs, riocs)
+    OCSS = (aaocs, iiocs, ggocs, riocs)
     rst = "rst/vchr/$cdir"
     isdir(rst) && rm(rst, force = true, recursive = true)
     mkpath(rst)
@@ -38,14 +38,14 @@ function qtskit(cdir::Int; nrpt = 30)
         MAF = maf,
         ΔF = dF,
         ε = ε,
-        Schemes = OOCS,
+        Schemes = OCSS,
         Nrpt = nrpt,
     )
     savepar(scenario, "$rst/scenario.par")
     chkbase(base, species) # Prepare/verify a base population
     npd = ndigits(nrpt)
     sumfile = "$rst/summary.ser"
-    OOCS = (iiocs, ggocs, riocs)
+    OCSS = (iiocs, ggocs, riocs)
     
     for irpt ∈ 1:nrpt
         tag = lpad(irpt, npd, '0')
