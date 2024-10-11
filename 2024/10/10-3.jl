@@ -6,6 +6,7 @@ function subtskit(; idir = "base/tskit", odir = "base/vchr")
     lmp = deserialize("$idir/BosTau.lmp")
     _, nhp = XY.dim("$idir/BosTau.xy")
     for nchr in [1:3; 4:5:29]
+        @info "Processing chromosome $nchr"
         tdir = joinpath(odir, "$nchr")
         isdir(tdir) || mkpath(tdir)
         slc = sum(lmp.chr .≤ nchr)
