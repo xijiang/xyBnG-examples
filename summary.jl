@@ -41,8 +41,8 @@ function fnprt(
         df = mps[s]
         rg = -fdr+2:length(df.grt)
         plot!(fig, df.grt[rg] .+ fdr, df.nsire[rg], linestyle = :solid, color = color)
-        annotate!(df.grt[end] .+ fdr, df.nsire[end], text(uppercase(s[1:2]), 10, :top))
-        plot!(fig, df.grt[rg] .+ fdr, df.ndam[rg], linestyle = :dash, color = color)
+        annotate!(df.grt[end] .+ fdr, df.nsire[end], text(uppercase(s[1:2]), 5, :top))
+        plot!(fig, df.grt[rg] .+ fdr, df.ndam[rg], linestyle = :dot, color = color)
         color += 1
     end
     fig
@@ -64,7 +64,7 @@ function fmtbv(
     for s in ss
         df = mps[s]
         plot!(fig, df.grt .+ fdr, df.mtbv)
-        annotate!(df.grt[end] .+ fdr, df.mtbv[end], text(uppercase(s[1:2]), 10, :top))
+        annotate!(df.grt[end] .+ fdr, df.mtbv[end], text(uppercase(s[1:2]), 4, :top))
     end
     fig
 end

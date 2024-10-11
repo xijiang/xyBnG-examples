@@ -1,7 +1,7 @@
 using Plots
 
 """
-    tstfn(; nsir = 25, ndam = 50, ng = 10, nrpt = 30)
+    tstfn(; nsir = 25, ndam = 50, ng = 10, nrpt = 100)
 Test ΔF in random mating.
 
 uses "qg/random-mating.jl".
@@ -17,6 +17,5 @@ function tstfn(; nsir = 25, ndam = 50, ng = 10, nrpt = 30)
     Ne = 2 / mean(x -> 1/x, [nsir, ndam])
     ΔF = 1 / 2Ne
     eF = 1 .- (1 - ΔF) .^ (0:ng-1)
-    #round.([mF, ΔF * 0:ng-1], digits = 4)
     [mF eF]
 end
