@@ -2,8 +2,8 @@ using DataFrames
 using Serialization
 using Statistics
 
-function trial()
-    nsir, ndam, noff, ng, nrpt = 25, 50, 100, 25, 40
+function trial(; nrpt = 100)
+    nsir, ndam, noff, ng = 25, 50, 100, 25
     Ne = 2 / mean(x -> 1/x, [nsir, ndam])
     ΔF = 1 / 2Ne
     eF = 1 .- (1 - ΔF) .^ (0:ng-1)
