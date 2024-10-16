@@ -1,4 +1,5 @@
 using DataFrames
+using Plots
 using Serialization
 using Statistics
 
@@ -19,4 +20,16 @@ function trial(; nrpt = 100)
     end
     df.Fr, df.F1d, df.F2d, df.F4d, df.Fb = Fr, F1d, F2d, F4d, Fb
     serialize("deltaF.ser", df)
+end
+
+function ibdPlot()
+    df = deserialize("deltaF.ser")
+    df.grt = repeat(1:25, outer = size(ped, 1) ÷ 25)
+    rst = combine(groupby(df, :grt), Not(:grt) .=> mean .=> Not(:grt))
+    plot( rst.grt, rst.Fe, label = "Theoretical")
+    plot!(rst.grt, rst.Fr, label = "Empirical")
+    plot!(rst.grt, rst.F1d, label = "Hierarchical 1d")
+    plot!(rst.grt, rst.F2d, label = "Hierarchical 2d")
+    plot!(rst.grt, rst.F4d, label = "Hierarchical 4d")
+    plot!(rst.grt, rst.Fb, label = "Balanced")
 end

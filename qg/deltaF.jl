@@ -80,9 +80,9 @@ function hierarchical_mate(nsir::Int, ndam::Int, noff::Int, ng::Int)
 
     for ig = 1:ng
         pg = filter(row -> row.grt == ig - 1, ped)
-        cs = pg.id[pg.sex.==1] # candidate sires
-        cd = pg.id[pg.sex.==0] # candidate dams
-        pm = sortslices([off2prt(cs, noff) off2prt(cd, noff)], dims = 1)
+        ss = shuffle(pg.id[pg.sex.==1])[1:nsir] # selected sires
+        ds = shuffle(pg.id[pg.sex.==0])[1:ndam] # selected dams
+        pm = sortslices([off2prt(ss, noff) off2prt(ds, noff)], dims = 1)
         append!(ped, DataFrame(
             grt = ig,
             id = noff * ig + 1:noff * (ig + 1),
