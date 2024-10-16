@@ -95,3 +95,27 @@ function hierarchical_mate(nsir::Int, ndam::Int, noff::Int, ng::Int)
     ped.F = diag(A) .- 1
     combine(groupby(ped, :grt), :F => mean => :mF).mF[2:end]
 end
+
+function balanced_mate(nsir::Int, ndam::Int, ng::Int)
+    nsir ≤ ndam || throw(ArgumentError("nsir must be less than or equal ndam"))
+    ped = DataFrame(grt = Int[], id = Int[], sire = Int[], dam = Int[], sex = Int[])
+    for id in 1:nsir
+        push!(ped, (0, id, 0, 0, 1))
+    end
+    for id in 1:ndam
+        push!(ped, (0, id + nsir, 0, 0, 0))
+    end
+    for ig = 1:ng
+        pg = filter(row -> row.grt == ig - 1, ped)
+        cs = pg.id[pg.sex .== 1] # candidate sires
+        ds = pg.id[pg.sex .== 0] # candidate dams
+        cs = shuffle(cs)[1:nsir]
+        for i in 1:ndam
+            push!(ped, (ig, pg.id[end] + 2i - 1, cs[i % nsir + 1], ds[i], 0))
+            push!(ped, (ig, pg.id[end] + 2i, cs[i % nsir + 1], ds[i], 1))
+        end
+    end
+    A = nrm(ped)
+    ped.F = diag(A) .- 1
+    combine(groupby(ped, :grt), :F => mean => :mF).mF[2:end]
+end
