@@ -10,13 +10,13 @@ function sumvchr(; vdir = "xyBnG/rst/var-chr/")
         push!(rst, getdata(dir))
     end
     ss = keys(rst[1])
-    #Plots.scalefontsizes(0.3) # only run once
-    #=
+    Plots.scalefontsizes(0.3) # only run once
     nprt = Any[]
     for dic in rst
         push!(nprt, fnprt(dic, ss, ylm = (13, 42)))
     end
     plot(nprt..., layout = (3, 3))
+    #=
     savefig("/home/xijiang/docs/reseach-notes/assets/2024/10/10/nprt.png")
     
     mtbv = Any[]
@@ -25,10 +25,10 @@ function sumvchr(; vdir = "xyBnG/rst/var-chr/")
     end
     plot(mtbv..., layout = (3, 3))
     savefig("/home/xijiang/docs/reseach-notes/assets/2024/10/10/mtbv.png")
-    =#
     bdry = Any[]
     for dic in rst
         push!(bdry, fbdry(dic, ss))
     end
     plot(bdry..., layout = (3, 3))
+    =#
 end
