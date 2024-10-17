@@ -45,8 +45,8 @@ function paper_1_tk(bdir, dF, rst; nrpt = 100, ε = 1e-6)
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
         @info "  - Prepare a founder population"
-        fxy = "$base/BosTau.xy"
-        fmp = "$base/BosTau.lmp"
+        fxy = "$bdir/BosTau.xy"
+        fmp = "$bdir/BosTau.lmp"
         lmp, F0 = initPop(fxy, fmp, rst, plan, maf, nchp, nref, nrng, trait, tag)
         
         # aaocs
