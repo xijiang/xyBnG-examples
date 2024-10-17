@@ -5,9 +5,9 @@ import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase, ggocs, aaocs, iiocs, igocs
 
-function paper_1_tk(bdir, dF, rst; nrpt = 100, ε = 1e-6)
+function paper_1_tk(bdir, dF, nrng, rst; nrpt = 100, ε = 1e-6)
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
-    nrng, nsel, maf = 5, 30, 0.0
+    nsel, maf = 30, 0.0
     species = Cattle(5_000)
     lgnm = 24.89385779     # length of genome in Morgen
     blm = deserialize("$bdir/BosTau.lmp")
@@ -67,7 +67,7 @@ function paper_1_tk(bdir, dF, rst; nrpt = 100, ε = 1e-6)
     end
 end
 
-function paper_1_pg(chr, dF, rst; nrpt = 100)
+function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
     # remember `ulimit -s 1000000` before julia REPL
     sdir = @__DIR__
     if !isfile("$sdir/pgsnp")
@@ -77,7 +77,7 @@ function paper_1_pg(chr, dF, rst; nrpt = 100)
     nchr = length(chr)
     ε = nchr < 5 ? 1e-6 : 0.0
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
-    nrng, nsel, maf, hist, mr = 5, 30, 0.0, 5000, 4.0
+    nsel, maf, hist, mr = 5, 30, 0.0, 5000, 4.0
     species = Cattle(plan.noff)
     lgnm = 24.89385779     # length of genome in Morgen
     rog = sum(chr) / lgnm  # ratio of genome

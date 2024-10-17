@@ -41,11 +41,11 @@ function T2024101701()
         0.45940150,
         0.51098607,
     ]
-
+    nrng = 15
     for dF in (0.01, 0.0075, 0.00625, 0.005)
-        paper_1_tk("base/vchr/1",  dF, "rst/tk/01")
-        paper_1_tk("base/vchr/29", dF, "rst/tk/29")
-        paper_1_pg(clng[1:1],  dF, "rst/pg/01")
-        paper_1_pg(clng[1:29], dF, "rst/pg/29")
+        paper_1_tk("base/vchr/1",  dF, nrng, "rst/tk/01")
+        paper_1_tk("base/vchr/29", dF, nrng, "rst/tk/29")
+        paper_1_pg(clng[1:1],  dF, nrng, "rst/pg/01")
+        paper_1_pg(clng[1:29], dF, nrng, "rst/pg/29")
     end
 end
