@@ -112,6 +112,9 @@ function paper_1_pg(chr, dF, rst; nrpt = 100)
         println(io, "BosTau")
         println(io, species.nid)
     end
+    sumfile = "$rst/summary.ser"
+    ocss = (iiocs, ggocs, igocs)
+
     for irpt = 1:nrpt
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
