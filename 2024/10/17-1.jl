@@ -45,8 +45,8 @@ function T2024101701(; nrng = 15)
     for i in 1:4
         dF = F[i]
         for chr in (1, 29)
-            paper_1_tk("base/vchr/$chr",  dF, nrng, "rst/tk/c$chr/$i")
-            paper_1_pg(clng[1:$chr], dF, nrng, "rst/pg/c$chr/$i")
+            paper_1_tk("base/vchr/$chr",  dF, nrng, "rst/tk/c$chr/$i"; nrpt = 50)
+            paper_1_pg(clng[1:$chr], dF, nrng, "rst/pg/c$chr/$i"; nrpt = 50)
         end
     end
 end
