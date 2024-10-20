@@ -9,7 +9,7 @@ Results for paper I.
 
 Uses paper-i.jl.
 """
-function T2024101701(; nrng = 15)
+function T2024101701(; nrng = 15, nrpt = 50)
     clng = [
         1.58534110,
         1.36231102,
@@ -45,8 +45,8 @@ function T2024101701(; nrng = 15)
     for chr in (1, 29)
         for i in 1:4
             dF = F[i]
-            paper_1_tk("base/vchr/$chr",  dF, nrng, "rst/tk/c$chr/$i"; nrpt = 50)
-            paper_1_pg(clng[1:chr], dF, nrng, "rst/pg/c$chr/$i"; nrpt = 50)
+            paper_1_pg(clng[1:chr], dF, nrng, "rst/pg/c$chr/$i"; nrpt = nrpt)
+            paper_1_tk("base/vchr/$chr",  dF, nrng, "rst/tk/c$chr/$i"; nrpt = nrpt)
         end
     end
 end
