@@ -41,12 +41,23 @@ function T2024101701(; nrng = 15, nrpt = 50)
         0.45940150,
         0.51098607,
     ]
-    F = (0.005, 00625, 0.0075, 0.01)
-    for chr in (1, 29)
-        for i in 1:4
-            dF = F[i]
-            paper_1_pg(clng[1:chr], dF, nrng, "rst/pg/c$chr/$i"; nrpt = nrpt)
-            paper_1_tk("base/vchr/$chr",  dF, nrng, "rst/tk/c$chr/$i"; nrpt = nrpt)
-        end
-    end
+    paper_1_pg([1.58534110], 0.005,   nrng, "rst/pg/c01/1"; nrpt = nrpt)
+    paper_1_pg([1.58534110], 0.00625, nrng, "rst/pg/c01/2"; nrpt = nrpt)
+    paper_1_pg([1.58534110], 0.0075,  nrng, "rst/pg/c01/3"; nrpt = nrpt)
+    paper_1_pg([1.58534110], 0.01,    nrng, "rst/pg/c01/4"; nrpt = nrpt)
+
+    paper_1_pg(clng, 0.005,   nrng, "rst/pg/c29/1"; nrpt = nrpt)
+    paper_1_pg(clng, 0.00625, nrng, "rst/pg/c29/2"; nrpt = nrpt)
+    paper_1_pg(clng, 0.0075,  nrng, "rst/pg/c29/3"; nrpt = nrpt)
+    paper_1_pg(clng, 0.01,    nrng, "rst/pg/c29/4"; nrpt = nrpt)
+
+    paper_1_tk("base/vchr/1", 0.005,   nrng, "rst/tk/c01/1"; nrpt = nrpt)
+    paper_1_tk("base/vchr/1", 0.00625, nrng, "rst/tk/c01/2"; nrpt = nrpt)
+    paper_1_tk("base/vchr/1", 0.0075,  nrng, "rst/tk/c01/3"; nrpt = nrpt)
+    paper_1_tk("base/vchr/1", 0.01,    nrng, "rst/tk/c01/4"; nrpt = nrpt)
+
+    paper_1_tk("base/vchr/29", 0.005,   nrng, "rst/tk/c29/1"; nrpt = nrpt)
+    paper_1_tk("base/vchr/29", 0.00625, nrng, "rst/tk/c29/2"; nrpt = nrpt)
+    paper_1_tk("base/vchr/29", 0.0075,  nrng, "rst/tk/c29/3"; nrpt = nrpt)
+    paper_1_tk("base/vchr/29", 0.01,    nrng, "rst/tk/c29/4"; nrpt = nrpt)
 end
