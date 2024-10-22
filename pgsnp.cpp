@@ -40,10 +40,10 @@ int       tvec[tmp_vec_len];
 typedef uniform_int_distribution<int> UID;
 
 int insert(int *a, int m, int *b, int n){
-//Insert b into a.  a is of length max_mutations, current length m;
-// b of length n holds new mutations
-// This sorting program will remove mutations that's same as an existing one.
-// Since the uniform range is [0, 1e8], it's not easy to get repeats in new muts
+  //Insert b into a.  a is of length max_mutations, current length m;
+  // b of length n holds new mutations
+  // This sorting program will remove mutations that's same as an existing one.
+  // Since the uniform range is [0, 1e8], it's not easy to get repeats in new muts
   int i, j, k;
   i=j=k=0;
 
@@ -63,11 +63,11 @@ int insert(int *a, int m, int *b, int n){
 }
 
 int splice(int seg, int *a, int la, int *b, int lb, int *c, int lc, int *d){
-//splice a of length la and  (a, b, c, & d are all sorted in ascending order)
-//       b .. ...... lb into
-//       d .. ...... ld afterworth, with splicing information
-//       c .. ...... lc, ld is returned
-//  seg is the initial haplotpye, either 0 for a or 1 for b.
+  //splice a of length la and  (a, b, c, & d are all sorted in ascending order)
+  //       b .. ...... lb into
+  //       d .. ...... ld afterworth, with splicing information
+  //       c .. ...... lc, ld is returned
+  //  seg is the initial haplotpye, either 0 for a or 1 for b.
   int ia, ib, ic, ld, i;
   ia=ib=ic=ld=0;
   while(ic<lc) {
@@ -185,7 +185,7 @@ int main(int argc, char*argv[]) {
   for(i=0; i<2; ++i)
     for(iid=0; iid<ne; ++iid)
       for(ihap=0; ihap<2; ++ihap)
-	  nSNP[i][iid][ihap]=0;
+	nSNP[i][iid][ihap]=0;
   nhap=ne*2;
   clog<<"done."<<endl;
 
