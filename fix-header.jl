@@ -17,7 +17,7 @@ function fix_header(file)
         end
         if abs(fz - nlc * nhp / 8 - 24) < 10
             @info "This is maybe of BitArray, header type will be changed ..."
-            hdr.type = 13
+            hdr.r, hdr.type = 1, 13
             xyBnG.XY.header!(file, hdr)
             @info "Done"
         end
