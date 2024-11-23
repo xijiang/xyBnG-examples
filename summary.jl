@@ -22,6 +22,19 @@ function getdata(dir)
     mps # mean of parameters in each scheme
 end
 
+function lmtof(data, ss, par...; fg = 1)
+    ys = Float64[]
+    for mps in data
+        for s in ss
+            df = mps[s]
+            for p in par
+                append!(ys, df[!, p][fg:end])
+            end
+        end
+    end
+    extrema(ys)
+end
+
 """
     fnprt(mps, ss; fdr = -5, xlbl = "Generation", ylbl = "N_parents", ylm = :best)
 Plot the number of parents in each generation of each scheme in `ss`. The solid
@@ -70,22 +83,36 @@ function fmtbv(
 end
 
 """
-    fbdry(mps, ss; fdr = -5, ylm = :best, xlbl = "Generation", ylbl = "Boundaries")
+    fbdry(mps, ss; fdr = -5, ylm = :best, xlbl = "Generation")
 Plot the Boundaries of each scheme in `ss`. The solid lines are lower boundaries. 
 The dashed lines are upper boundaries.
 """
-function fbdry(mps, ss; fdr = -5, ylm = :best, xlbl = "Generation", ylbl = "Boundaries")
-    fig = plot(dpi = 300, ylim = ylm, xlabel = xlbl, ylabel = ylbl, legend = false)
+function fbdry(mps, ss, lms; fdr = -5)
+    alm = (lms[3] - 5, lms[4] + 5) # ceilings
+    blm = (lms[1] - 5, lms[2] + 5) # floors
+    fc = plot(dpi = 300, ylim = alm, legend = false, size = (150, 300), xaxis = false)
+    ff = plot(dpi = 300, ylim = blm, legend = false, size = (150, 300))
     color = 1
     for s in ss
         df = mps[s]
-        plot!(fig, df.grt .+ fdr, df.floor, color = color)
-        annotate!(df.grt[end] .+ fdr, df.floor[end], text(uppercase(s[1:2]), 10, :top))
-        plot!(fig, df.grt .+ fdr, df.ceiling, color = color, linestyle = :dash)
-        annotate!(df.grt[end] .+ fdr, df.ceiling[end], text(uppercase(s[1:2]), 10, :bottom))
+        plot!(
+            ff,
+            df.grt .+ fdr,
+            df.floor,
+            color = color,
+        )
+        annotate!(ff, df.grt[end] .+ fdr, df.floor[end], text(uppercase(s[1:2]), 5, :top))
+        plot!(
+            fc,
+            df.grt .+ fdr,
+            df.ceiling,
+            color = color,
+            linestyle = :dash,
+        )
+        annotate!(fc, df.grt[end] .+ fdr, df.ceiling[end], text(uppercase(s[1:2]), 5, :bottom))
         color += 1
     end
-    fig
+    plot(fc, ff, layout = (2, 1))
 end
 
 """
@@ -99,9 +126,9 @@ function fvarg(mps, ss; fdr = -5, ylm = :best, xlbl = "Generation", ylbl = "Var(
     for s in ss
         df = mps[s]
         plot!(fig, df.grt .+ fdr, df.vtbv, color = color)
-        annotate!(df.grt[end] .+ fdr, df.vtbv[end], text(uppercase(s[1:2]), 10, :top))
+        annotate!(df.grt[end] .+ fdr, df.vtbv[end], text(uppercase(s[1:2]), 5, :top))
         plot!(fig, df.grt .+ fdr, df.genicv, linestyle = :dash, color = color)
-        annotate!(df.grt[end] .+ fdr, df.genicv[end], text(uppercase(s[1:2]), 10, :bottom))
+        annotate!(df.grt[end] .+ fdr, df.genicv[end], text(uppercase(s[1:2]), 5, :bottom))
         color += 1
     end
     fig
@@ -126,4 +153,24 @@ function fibrd(mps, ss, ps; fdr = -5, ylm = :best, xlbl = "Generation", ylbl = "
         color += 1
     end
     fig
+end
+
+"""
+    cmpibd(mps, s; fdr = -5, ylm = :best)
+Compare inbreeding indicators of one scenario `s` in `mps`.
+"""
+function cmpibd(mps, s; fdr = -5, ylm = :best)
+    fig = plot(dpi = 300, ylim = ylm, xlabel = "Generation", ylabel = "Inbreeding")
+    plot!(mps[s].grt .+ fdr, mps[s].fibd, label = "IBD")
+    annotate!(mps[s].grt[end] .+ fdr, mps[s].fibd[end], text("IBD", 5, :left))
+    plot!(mps[s].grt .+ fdr, mps[s].fped, label = "Ped")
+    annotate!(mps[s].grt[end] .+ fdr, mps[s].fped[end], text("Ped", 5, :left))
+    # plot!(mps[s].grt .+ fdr, mps[s].fhet, label = "Het")
+    # annotate!(mps[s].grt[end] .+ fdr, mps[s].fhet[end], text("Het", 5, :left))
+    # plot!(mps[s].grt .+ fdr, mps[s].fdrift, label = "Drift")
+    # annotate!(mps[s].grt[end] .+ fdr, mps[s].fdrift[end], text("Drift", 5, :left))
+    plot!(mps[s].grt .+ fdr, mps[s].fhet2, label = "Het2")
+    annotate!(mps[s].grt[end] .+ fdr, mps[s].fhet2[end], text("Het2", 5, :left))
+    plot!(mps[s].grt .+ fdr, mps[s].fdrift2, label = "Drift2")
+    annotate!(mps[s].grt[end] .+ fdr, mps[s].fdrift2[end], text("Drift2", 5, :left))
 end
