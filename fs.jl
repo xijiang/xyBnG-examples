@@ -1,41 +1,33 @@
-module FDR
 using Distributions
 using Random
 
 """
-    sim(nid, ngn, cln, mr; rr = 1.0, mm=120_000, bpm=100_000_000, cpd=1_000)
+    fwdsim(
+        nid::Int;       # population size
+        ngn::Int = 5000,    # number of generations
+        cln::Float64 = 1.0, # chromosome length in Morgen
+        mr::Float64 = 1.0,  # mutation rate per Morgen per generation
+        rr::Float64 = 1.0,  # recombination rate per Morgen per meiosis
+        )
 This is forward simulator of one chromosome of a diploid Fisher-Wright
-population:
-
-- Populaiton size: `nid`. 
-- Chromosome length: `cln` Morgen
-- Mutation rate: `mr` per Morgen.
-
-Optional arguments:
-- Recombination rate: `rr` = 1.0 crossover per Morgan per meiosis.
-- Maximal number of mutations per haploid: `mm` = 1.2e5
-- Number of base pairs per Morgen: `bpm` = 1e8
-- Comb period: `cpd` = 1e3 generations, to remove fixed loci every `cpd`
-  generations.
+population.
 """
-function sim(
-    nid::Int,       # population size
-    ngn::Int,       # number of generations
-    cln::Float64,   # chromosome length in Morgen
-    mr::Float64;    # mutation rate per Morgen per generation
-    rr = 1.0,       # recombination rate per Morgen per meiosis
-    mm = 120_000,   # maximal mutations per haploid
-    bpm = 100_000_000,  # Base pair per Morgen
-    comb = 1_000,    # comb (out fixed loci) period in generations
-)
-    # check parameters
-    nid < 4 ||
-        ngn < 100 ||
-        cln < 1e-6 ||
-        cln > 5 ||
-        mr < 0.01 && error("Arguments out of range")
-
+function fwdsim(
+    nid::Int;       # population size
+    ngn::Int = 5_000,   # number of generations
+    cln::Float64 = 1.0, # chromosome length in Morgen
+    mr::Float64 = 1.0,  # mutation rate per Morgen per generation
+    rr::Float64 = 1.0,  # recombination rate per Morgen per meiosis
+    )
+    mm = 120_000      # maximal mutations per haploid
+    bpm = 100_000_000 # Base pairs per Morgen
+    comb = 1_000      # comb (out fixed loci) period in generations
+    
     @info "Generating an ideal population"
+    @info "Check parameters"
+    nid ≥ 4 && ngn ≥ 100 && 1e-6 ≤ cln ≤ 6 && 01 ≤ mr ≤ 12 && 0.1 ≤ rr ≤ 5||
+        error("Arguments out of range")
+
     @info "  - Initializing pars and storage"
     # Allocate memory
     snp, nsp = zeros(Int8, mm, 2, nid, 2), zeros(Int, nid, 2, 2)
@@ -58,4 +50,3 @@ function sim(
         end
     end
 end
-end # module FS

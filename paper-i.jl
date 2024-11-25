@@ -84,7 +84,7 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
     nchp = Int(round(5e4 * rog))
     nref = Int(round(1e4 * rog))
     trait = Trait("growth", 0.25 * rog, nref) # nqtl = nref
-    OCSS = (aaocs, iiocs, ggocs, igocs)
+    OCSS = (aaocs, iiocs, ggocs, igocs, hgocs, hhocs)
     isdir(rst) && rm(rst, force = true, recursive = true)
     mkpath(rst)
     scenario = (
