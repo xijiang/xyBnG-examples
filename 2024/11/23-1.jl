@@ -9,7 +9,7 @@ Results for paper I.
 
 Uses paper-i.jl.
 """
-function T2024112301(; nrng = 5, nrpt = 50)
+function T2024112301(; nrng = 5, nrpt = 50, group = 1)
     clng = [
         1.58534110,
         1.36231102,
@@ -41,9 +41,11 @@ function T2024112301(; nrng = 5, nrpt = 50)
         0.45940150,
         0.51098607,
     ]
-    paper_1_pg([1.58534110], 0.005, nrng, "rst/pg/c01/1"; nrpt = nrpt)
-    paper_1_pg([1.58534110], 0.01,  nrng, "rst/pg/c01/4"; nrpt = nrpt)
-
-    paper_1_pg(clng, 0.005, nrng, "rst/pg/c29/1"; nrpt = nrpt)
-    paper_1_pg(clng, 0.01,  nrng, "rst/pg/c29/4"; nrpt = nrpt)
+    if group == 1
+        paper_1_pg([1.58534110], 0.005, nrng, "rst/pg/c01/1"; nrpt = nrpt)
+        paper_1_pg([1.58534110], 0.01,  nrng, "rst/pg/c01/4"; nrpt = nrpt)
+    else
+        paper_1_pg(clng, 0.005, nrng, "rst/pg/c29/1"; nrpt = nrpt)
+        paper_1_pg(clng, 0.01,  nrng, "rst/pg/c29/4"; nrpt = nrpt)
+    end
 end
