@@ -9,8 +9,8 @@ using Statistics
     getdata(dir)
 Read the summary file in the directory `dir` and return a dictionary of dataframes.
 """
-function getdata(dir)
-    rst = deserialize(joinpath(dir, "summary.ser"))
+function getdata(dir; file = "summary.ser")
+    rst = deserialize(joinpath(dir, file))
     schemes = unique(rst.scheme)
     dic = Dict{String,DataFrame}()
     mps = Dict{String,DataFrame}()

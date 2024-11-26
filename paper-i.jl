@@ -1,9 +1,24 @@
 using DataFrames
+using LinearAlgebra
 using Serialization
+using Statistics
 using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase, ggocs, aaocs, iiocs, igocs, hgocs, hhocs
+
+"""
+    function fhmlg(ped, xy)
+Calculate the mean F homozygosity of the generation.
+"""
+function fhmlg(ped, xy)
+    ped = deserialize(ped)
+    id = ped.id[ped.grt .== ped.grt[end]]
+    xy = xyBnG.XY.mapit(xy)
+    gt = isodd.(xy[:, 2id .- 1]) + isodd.(xy[:, 2id])
+    H = xyBnG.RS.grm(gt, p = ones(size(gt, 1)) * 0.5)
+    mean(diag(H)) - 1
+end
 
 function paper_1_tk(bdir, dF, nrng, rst; nrpt = 100, ε = 1e-6)
     plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
@@ -113,7 +128,8 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
         println(io, species.nid)
     end
     sumfile = "$rst/summary.ser"
-    ocss = (iiocs, ggocs, igocs, hgocs, hhocs)
+    ocss = (iiocs, ggocs, igocs)
+    hocs = (hgocs, hhocs)
 
     for irpt = 1:nrpt
         tag = lpad(irpt, npd, '0')
@@ -137,6 +153,13 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
         for scheme in ocss
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
             scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = ε)
+            summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
+            savesum(sumfile, summary)
+        end
+        for scheme in hocs
+            Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
+            foo, bar = "$tag-rand", tag * '-' * string(scheme)
+            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
             savesum(sumfile, summary)
         end
