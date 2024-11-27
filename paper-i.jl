@@ -17,7 +17,8 @@ function fhmlg(ped, xy)
     xy = xyBnG.XY.mapit(xy)
     gt = isodd.(xy[:, 2id .- 1]) + isodd.(xy[:, 2id])
     H = xyBnG.RS.grm(gt, p = ones(size(gt, 1)) * 0.5)
-    mean(diag(H)) - 1
+    #mean(diag(H)) - 1
+    mean(H)/2
 end
 
 function paper_1_tk(bdir, dF, nrng, rst; nrpt = 100, ε = 1e-6)
