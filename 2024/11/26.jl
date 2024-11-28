@@ -51,7 +51,7 @@ end
 """
 Plot ceiling, ΔTBV, and floor in tight layout.
 """
-function ctf(; file = "summary.jl")
+function ctf(; file = "summary.ser")
     nrs = 5
     pg = getdata("."; file = file)
     ss = keys(pg)
@@ -191,7 +191,7 @@ end
 
 function ibd(fdr, nrs, nch; k =1)
     dir = joinpath(fdr, nrs, nch)
-    pg = gatherdata(dir)
+    pg = getdata(dir)
     ss = keys(pg[k])
     sft = parse(Int, nrs) + 1
 
