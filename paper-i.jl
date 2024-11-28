@@ -8,21 +8,15 @@ import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase, ggocs, aaocs, iiocs, igocs, hgocs, hhocs
 
 """
-    function fhmlg(ped, xy)
-Calculate the mean F homozygosity of the generation.
+    f0hm(ped, xy, q)
+Calculate the mean F homozygosity with given `q`.
 """
-function fhmlg(ped, xy; onH = true)
+function f0hm(ped, xy, q)
     ped = deserialize(ped)
     id = ped.id[ped.grt .== ped.grt[end]]
     xy = xyBnG.XY.mapit(xy)
     gt = isodd.(xy[:, 2id .- 1]) + isodd.(xy[:, 2id])
-    if onH
-        H = xyBnG.RS.grm(gt, p = ones(size(gt, 1)) * 0.5)
-    else
-        q = mean(gt, dims = 2) / 2
-        H = xyBnG.RS.grm(gt, p = vec(q))
-    end
-    #mean(diag(H)) - 1
+    H = xyBnG.RS.grm(gt, p = q)
     mean(H)/2
 end
 
@@ -163,9 +157,9 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
             savesum(sumfile, summary)
         end
         for scheme in hocs
-            Fh = fhmlg("$rst/$tag-rand.ped",
-                       "$rst/$tag-rand.xy",
-                       onH = string(scheme)[1] == 'h')
+            Fh = string(scheme)[1] == 'h' ? 
+                f0hm("$rst/$tag-rand.ped", "$rst/$tag-rand.xy", 0.5ones(size(lmp, 1))) :
+                f0hm("$rst/$tag-rand.ped", "$rst/$tag-rand.xy", lmp.frq)
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
             scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
