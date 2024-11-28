@@ -20,7 +20,7 @@ function fhmlg(ped, xy; onH = true)
         H = xyBnG.RS.grm(gt, p = ones(size(gt, 1)) * 0.5)
     else
         q = mean(gt, dims = 2) / 2
-        H = xyBnG.RS.grm(gt, p = q)
+        H = xyBnG.RS.grm(gt, p = vec(q))
     end
     #mean(diag(H)) - 1
     mean(H)/2
