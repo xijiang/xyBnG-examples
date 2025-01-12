@@ -2,6 +2,7 @@
 
 using DataFrames
 using LaTeXStrings
+using Mmap
 using Measures
 using Plots
 using Serialization
@@ -46,12 +47,13 @@ function readRst()
         for grp in groupby(r, :scheme)
             mps[grp.scheme[1]] = combine(
                 groupby(grp, :grt),
-                Not(:repeat, :scheme) .=> mean .=> Not(:repeat, :scheme)
-                )
+                Not(:repeat, :scheme) .=> mean .=> Not(:repeat, :scheme),
+            )
             tdf = combine(
                 groupby(grp, :grt),
-                Not(:repeat, :scheme, :grt, :nid) .=> std .=> Not(:repeat, :scheme, :grt, :nid)
-                )
+                Not(:repeat, :scheme, :grt, :nid) .=>
+                    std .=> Not(:repeat, :scheme, :grt, :nid),
+            )
             vps[grp.scheme[1]] = select(tdf, Not(:grt)) ./ sqrt(nrpt)
         end
         push!(mpg, mps)
@@ -66,7 +68,7 @@ end
 Assign a fixed color to each line in `dat`. The colors are for all the figures.
 """
 function line_clr(dat)
-    cs = Dict{String, Int}()
+    cs = Dict{String,Int}()
     for (i, k) in enumerate(keys(dat))
         cs[k] = i
     end
@@ -80,7 +82,7 @@ Get the extrema of the column `col` in all the DataFrames in `dat`. Also add a
 """
 function xtrm(dat, col)
     x, n = Float64[], length(dat)
-    for i in 1:n
+    for i = 1:n
         for s in keys(dat[i])
             df = dat[i][s]
             append!(x, extrema(df[!, col]))
@@ -118,12 +120,8 @@ Each scheme is plotted in a fixed color defined in `clr`.
 function fig_mtbv(mpg, vpg, clr)
     ylm = xtrm(mpg, :mtbv)
     fs, n = [], length(mpg)
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :mtbv)
         for s in ks
             df = mpg[i][s]
@@ -137,14 +135,17 @@ function fig_mtbv(mpg, vpg, clr)
                 legend = :bottomright,
                 foreground_color_legend = nothing,
                 background_color_legend = nothing,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         push!(fs, fig)
     end
     annotate!(
         fs[1],
-        -4.5, ylm[2] * .9,
-        text(L"\overline{\mathrm{TBV}}", 10, :left, rotation = 90))
+        -4.5,
+        ylm[2] * 0.9,
+        text(L"\overline{\mathrm{TBV}}", 10, :left, rotation = 90),
+    )
     annotate!(fs[2], 15, 0, text("Generation", 10, :bottom))
     plot(fs..., layout = (1, 2), size = (800, 400))
     savefig("mtbv.pdf")
@@ -165,12 +166,8 @@ function fig_nprt(mpg, vpg, clr; p = 0)
         extrema(t)
     end
     fs, n, rg = [], length(mpg), 7:35
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :nsire)
         for s in ks
             df = mpg[i][s]
@@ -184,21 +181,25 @@ function fig_nprt(mpg, vpg, clr; p = 0)
                 foreground_color_legend = nothing,
                 background_color_legend = nothing,
                 legend = abs(p - i) == 2 ? :right : :topright,
-                color = clr[s])
+                color = clr[s],
+            )
             plot!(
                 fig,
                 df.grt[rg] .- 5,
                 df.ndam[rg],
                 linestyle = :dash,
                 label = false,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         push!(fs, fig)
     end
     annotate!(
         fs[1],
-        1.5, ylm[2] * .8,
-        text(L"\overline{N_{\mathrm{parent}}}", 10, :left, rotation = 90))
+        1.5,
+        ylm[2] * 0.8,
+        text(L"\overline{N_{\mathrm{parent}}}", 10, :left, rotation = 90),
+    )
     annotate!(fs[2], 25, 1, text("Generation", 10, :bottom))
     plot(fs..., layout = (1, 2), size = (800, 400))
     savefig("nprt.pdf")
@@ -220,12 +221,8 @@ function fig_vg(mpg, vpg, clr)
         extrema(t)
     end
     fs, n = [], length(mpg)
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :genicv)
         for s in ks
             df = mpg[i][s]
@@ -236,7 +233,8 @@ function fig_vg(mpg, vpg, clr)
                 fillalpha = 0.1,
                 ribbon = vpg[i][s].genicv,
                 label = uppercase(s[1:2]),
-                color = clr[s])
+                color = clr[s],
+            )
             plot!(
                 fig,
                 df.grt .- 5,
@@ -246,7 +244,8 @@ function fig_vg(mpg, vpg, clr)
                 foreground_color_legend = nothing,
                 background_color_legend = nothing,
                 legend = :topright,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         push!(fs, fig)
     end
@@ -254,7 +253,8 @@ function fig_vg(mpg, vpg, clr)
         fs[1],
         -4.5,
         ylm[1] + 0.33 * (ylm[2] - ylm[1]),
-        text("Genic/genetic variance", 10, :left, rotation = 90))
+        text("Genic/genetic variance", 10, :left, rotation = 90),
+    )
     h = (ylm[2] - ylm[1]) * 0.02 + ylm[1]
     annotate!(fs[2], 19, h, text("Generation", 10, :bottom))
     plot(fs..., layout = (1, 2), size = (800, 400))
@@ -277,12 +277,8 @@ function fig_space(mpg, vpg, clr; p = -10)
         extrema(t)
     end
     fs, n = [], length(mpg)
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :ceiling)
         for s in ks
             df = mpg[i][s]
@@ -294,29 +290,33 @@ function fig_space(mpg, vpg, clr; p = -10)
                 ribbon = vpg[i][s].ceiling,
                 label = uppercase(s[1:2]),
                 legend = :left,
-                color = clr[s])
-            end
-            ks = ord_last(mpg[i], :floor)
-            for s in ks
-                df = mpg[i][s]
-                plot!(
-                    fig,
-                    df.grt .- 5,
-                    df.floor,
-                    linestyle = :dash,
-                    fillalpha = 0.2,
-                    ribbon = vpg[i][s].floor,
-                    label = uppercase(s[1:2]),
-                    color = clr[s])
+                color = clr[s],
+            )
+        end
+        ks = ord_last(mpg[i], :floor)
+        for s in ks
+            df = mpg[i][s]
+            plot!(
+                fig,
+                df.grt .- 5,
+                df.floor,
+                linestyle = :dash,
+                fillalpha = 0.2,
+                ribbon = vpg[i][s].floor,
+                label = uppercase(s[1:2]),
+                color = clr[s],
+            )
         end
         push!(fs, fig)
     end
     annotate!(
         fs[1],
-        p, ylm[2] * .57, #-8 for 3:4
-        text("Brd. val.", 10, :left, rotation = 90))
-    annotate!(fs[1], 20, ylm[1] * .52, text("Floor", 10, :top))
-    annotate!(fs[1], 20, ylm[2] * .52, text("Ceiling", 10, :bottom))
+        p,
+        ylm[2] * 0.57, #-8 for 3:4
+        text("Brd. val.", 10, :left, rotation = 90),
+    )
+    annotate!(fs[1], 20, ylm[1] * 0.52, text("Floor", 10, :top))
+    annotate!(fs[1], 20, ylm[2] * 0.52, text("Ceiling", 10, :bottom))
     annotate!(fs[2], 25, ylm[1], text("Generation", 10, :bottom))
     plot(fs..., layout = (1, 2), size = (800, 400))
     savefig("space.pdf")
@@ -343,12 +343,8 @@ function fig_inbreeding(mpg, vpg, clr)
         extrema(t)
     end
     fs, n = [], length(mpg)
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fibd)
         for s in ks
             df = mpg[i][s]
@@ -361,15 +357,12 @@ function fig_inbreeding(mpg, vpg, clr)
                 label = uppercase(s[1:2]),
                 legend = :topleft,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         i == 2 && annotate!(fig, 15, ylm[2], text("IBD", 10))
         push!(fs, fig)
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fped)
         for s in ks
             df = mpg[i][s]
@@ -382,15 +375,12 @@ function fig_inbreeding(mpg, vpg, clr)
                 label = uppercase(s[1:2]),
                 legend = :topleft,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         i == 2 && annotate!(fig, 15, ylm[2], text("Pedigree", 10))
         push!(fs, fig)
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fhet3)
         for s in ks
             df = mpg[i][s]
@@ -403,15 +393,12 @@ function fig_inbreeding(mpg, vpg, clr)
                 label = uppercase(s[1:2]),
                 legend = :topleft,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         i == 2 && annotate!(fig, 15, ylm[2], text("Het.", 10))
         push!(fs, fig)
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fdrift3)
         for s in ks
             df = mpg[i][s]
@@ -424,7 +411,8 @@ function fig_inbreeding(mpg, vpg, clr)
                 label = uppercase(s[1:2]),
                 legend = :topleft,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
         i == 2 && annotate!(fig, 15, ylm[2], text("Drift", 10))
         push!(fs, fig)
@@ -450,12 +438,8 @@ function fig_fxqtl(mpg, vpg, clr)
         extrema(t)
     end
     fs, n = [], length(mpg)
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :xfq)
         for s in ks
             df = mpg[i][s]
@@ -468,15 +452,12 @@ function fig_fxqtl(mpg, vpg, clr)
                 label = uppercase(s[1:2]),
                 legendfontsize = 6,
                 legend = :right,
-                color = clr[s])
+                color = clr[s],
+            )
         end
-        annotate!(fig, 15, ylm[2] * .2, text("Favorite", 10))
+        annotate!(fig, 15, ylm[2] * 0.2, text("Favorite", 10))
         push!(fs, fig)
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :xuq)
         for s in ks
             df = mpg[i][s]
@@ -490,15 +471,18 @@ function fig_fxqtl(mpg, vpg, clr)
                 label = uppercase(s[1:2]),
                 legendfontsize = 6,
                 legend = :right,
-                color = clr[s])
+                color = clr[s],
+            )
         end
-        annotate!(fig, 15, ylm[2] * .2, text("Un-f...e", 10))
+        annotate!(fig, 15, ylm[2] * 0.2, text("Un-f...e", 10))
         push!(fs, fig)
     end
     annotate!(
         fs[1],
-        -3, ylm[2] * .65,
-        text("Number of fixed QTL", 8, :left, rotation = 90))
+        -3,
+        ylm[2] * 0.65,
+        text("Number of fixed QTL", 8, :left, rotation = 90),
+    )
     annotate!(fs[4], 20, 0, text("Generation", 8, :bottom))
     plot(fs..., layout = (1, 4), size = (800, 400))
     savefig("fixed-qtl.pdf")
@@ -522,13 +506,9 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
         extrema(t)
     end
     fs, n = [], length(mpg)
-    
-    for i in 1:n
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :xqtl)
         for s in ks
             df = mpg[i][s]
@@ -541,15 +521,12 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
                 label = uppercase(s[1:2]),
                 legend = :bottomright,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
-        annotate!(fig, 15, ylm[2] * .4, text("QTL", 10))
+        annotate!(fig, 15, ylm[2] * 0.4, text("QTL", 10))
         push!(fs, fig)
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :xref)
         for s in ks
             df = mpg[i][s]
@@ -562,15 +539,12 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
                 label = uppercase(s[1:2]),
                 legend = :bottomright,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
-        annotate!(fig, 15, ylm[2] * .4, text("Ref.", 10))
+        annotate!(fig, 15, ylm[2] * 0.4, text("Ref.", 10))
         push!(fs, fig)
-        fig = plot(
-            dpi = 300,
-            ylim = ylm,
-            size = (600, 400),
-        )
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :xchip)
         for s in ks
             df = mpg[i][s]
@@ -583,15 +557,13 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
                 label = uppercase(s[1:2]),
                 legend = :bottomright,
                 legendfontsize = 6,
-                color = clr[s])
+                color = clr[s],
+            )
         end
-        annotate!(fig, 15, ylm[2] * .4, text("Chip", 10))
+        annotate!(fig, 15, ylm[2] * 0.4, text("Chip", 10))
         push!(fs, fig)
     end
-    annotate!(
-        fs[1],
-        -3.5, ylm[2] * .45,
-        text("Prop. loci fixed", 8, :left, rotation = 90))
+    annotate!(fs[1], -3.5, ylm[2] * 0.45, text("Prop. loci fixed", 8, :left, rotation = 90))
     annotate!(fs[6], 15, 0, text("Generation", 8, :bottom))
     plot(fs..., layout = (2, 3), size = (800, 400))
     savefig("prp-fixed-$s.pdf")
@@ -599,15 +571,114 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
 end
 
 """
-    fig_frq_evo()
+    sum_frq_evo(clr, ds, file)
 Plot the evolution of allele frequency changes during the course of selection.
 The MAF are categorized into 399 groups. That is the occurrence number of of
 segregating allele 1. This is normalized by the total number of segregating
 loci. Only the frequencies of generation 1 and 30 are plotted.
 """
-function fig_frq_evo(clr)
-    for k in keys(clr)
+function sum_frq_evo(clr, ds, file)
+    frq, ti, nhp = zeros(400, 2), zeros(Int, 3), 14400
+    open(file, "w") do bin
+        for r in (1, 4)
+            for k in keys(clr)
+                print(k, ' ')
+                frq .= 0
+                for d in ds
+                    for i = 1:50
+                        tag = lpad(i, 2, '0')
+                        nlc = begin
+                            read!("$d/$r/$tag-$k.xy", ti)
+                            ti[2]
+                        end
+                        xy = mmap("$d/$r/$tag-$k.xy", Matrix{Int16}, (nlc, nhp), 24)
+                        for s in sum(isodd.(xy[:, 2001:2400]), dims = 2)
+                            s == 0 && continue
+                            frq[s, 1] += 1
+                        end
+                        for s in sum(isodd.(xy[:, 14001:14400]), dims = 2)
+                            s == 0 && continue
+                            frq[s, 2] += 1
+                        end
+                    end
+                end
+                write(bin, frq)
+            end
+        end
     end
+end
+
+function moveavg(x, n)
+    y = zeros(length(x) - n + 1)
+    for i = 1:length(y)
+        y[i] = mean(x[i:i+n-1])
+    end
+    y
+end
+
+function fig_frq_evo(clr, bin)
+    frq = zeros(400, 24)
+    read!(bin, frq)
+    fs = []
+    ts = sum(frq[1:399, 1])
+    vs = vec(sum(frq[1:399, 2:2:12], dims = 1))
+    ks = collect(keys(clr))[sortperm(vs, rev = true)]
+    fig = plot(dpi = 300, size = (600, 400), legend = :top)
+    for k in ks
+        scatter!(
+            fig,
+            1:399,
+            frq[1:399, 2clr[k]] / ts,
+            label = uppercase(k)[1:2],
+            markerstrokewidth = 0,
+            ms = 0.6,
+            color = clr[k],
+        )
+        ma = moveavg(frq[1:399, 2clr[k]] / ts, 5)
+        plot!(fig, 3:397, ma, color = clr[k], label = false)
+    end
+    scatter!(
+        fig,
+        1:399,
+        frq[1:399, 1] / ts,
+        label = L"G_1",
+        markerstrokewidth = 0,
+        ms = 0.6,
+    )
+    ma = moveavg(frq[1:399, 1] / ts, 5)
+    plot!(fig, 3:397, ma, label = false)
+    push!(fs, fig)
+    ts = sum(frq[1:399, 13])
+    vs = vec(sum(frq[1:399, 14:2:24], dims = 1))
+    ks = collect(keys(clr))[sortperm(vs, rev = true)]
+    fig = plot(dpi = 300, size = (600, 400), legend = :top)
+    for k in ks
+        scatter!(
+            fig,
+            1:399,
+            frq[1:399, 2clr[k]+12] / ts,
+            label = uppercase(k)[1:2],
+            markerstrokewidth = 0,
+            ms = 0.6,
+            color = clr[k],
+        )
+        ma = moveavg(frq[1:399, 2clr[k]+12] / ts, 5)
+        plot!(fig, 3:397, ma, color = clr[k], label = false)
+    end
+    scatter!(
+        fig,
+        1:399,
+        frq[1:399, 13] / ts,
+        label = L"G_{1}",
+        markerstrokewidth = 0,
+        ms = 0.6,
+    )
+    ma = moveavg(frq[1:399, 13] / ts, 5)
+    plot!(fig, 3:397, ma, label = false)
+    push!(fs, fig)
+    plot(fs..., layout = (1, 2), size = (800, 400))
+    savefig("test.pdf")
+    savefig("test.png")
 end
 
 """
@@ -615,8 +686,9 @@ end
 Generate all the figures for the paper.
 """
 function all_fig()
+    # Read the summary files
     mpg, vpg = readRst()
-    clr = line_clr(mpg[1])
+    clr = line_clr(mpg[1]) # Assign a fixed color to each scheme
 
     begin # Figure of mean TBV
         fig_mtbv(mpg[1:2], vpg[1:2], clr)
@@ -679,5 +751,16 @@ function all_fig()
         fig_prp_fixed(mpg[3:4], vpg[3:4], clr; s = 2)
         mv("prp-fixed-2.pdf", "prp-fixed-29.pdf", force = true)
         mv("prp-fixed-2.png", "prp-fixed-29.png", force = true)
+    end
+
+    begin # Evolution of allele frequency
+        #sum_frq_evo(clr, ("c01-1", "c01-2"), "ch01.bin")
+        #sum_frq_evo(clr, ["c29"], "ch29.bin")
+        fig_frq_evo(clr, "ch01.bin")
+        mv("test.pdf", "frq-evo-01.pdf", force = true)
+        mv("test.png", "frq-evo-01.png", force = true)
+        fig_frq_evo(clr, "ch29.bin")
+        mv("test.pdf", "frq-evo-29.pdf", force = true)
+        mv("test.png", "frq-evo-29.png", force = true)
     end
 end
