@@ -6,6 +6,7 @@ using xyBnG
 import xyBnG.Sum: xysum, savesum, cormat, savepar
 import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase, ggocs, aaocs, iiocs, igocs, hgocs, hhocs
+import xyBnG.xps: F0A, F0G, F0I, F0H
 
 """
     function fhmlg(ped, xy)
@@ -17,7 +18,6 @@ function fhmlg(ped, xy)
     xy = xyBnG.XY.mapit(xy)
     gt = isodd.(xy[:, 2id .- 1]) + isodd.(xy[:, 2id])
     H = xyBnG.RS.grm(gt, p = ones(size(gt, 1)) * 0.5)
-    #mean(diag(H)) - 1
     mean(H)/2
 end
 
@@ -132,6 +132,12 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
     ocss = (iiocs, ggocs, igocs)
     hocs = (hgocs, hhocs)
 
+    F0 = Dict(  # intialize F0 dictionary
+        'a' => 0.0,
+        'g' => 0.0,
+        'h' => 0.0,
+        'i' => 0.0,
+    )
     for irpt = 1:nrpt
         tag = lpad(irpt, npd, '0')
         @info "==========> Repeat: $tag / $nrpt <=========="
@@ -143,27 +149,36 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
         xyBnG.Conn.PG.toxy("$rst")
         fxy = "$rst/$(species.name).xy"
         fmp = "$rst/$(species.name).lmp"
-        lmp, F0 = initPop(fxy, fmp, rst, plan, maf, nchp, nref, nrng, trait, tag)
+        lmp, _ = initPop(fxy, fmp, rst, plan, maf, nchp, nref, nrng, trait, tag)
+        begin # update F0
+            ped = deserialize("$rst/$tag-rand.ped")
+            rxy = "$rst/$tag-rand.xy"
+            F0['a'] = F0A(ped)
+            F0['g'] = F0G(rxy, lmp, ped)
+            F0['i'] = F0I(rxy, lmp, ped)
+            F0['h'] = F0H(rxy, lmp, ped)
+        end
 
         # aaocs
         foo, bar = "$tag-rand", "$tag-aaocs"
-        aaocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
+        aaocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0['a'])
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum(sumfile, summary)
 
         for scheme in ocss
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
-            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0; ε = ε)
+            ch = string(scheme)[1]
+            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0[ch]; ε = ε)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
             savesum(sumfile, summary)
         end
-        for scheme in hocs
-            Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
-            foo, bar = "$tag-rand", tag * '-' * string(scheme)
-            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
-            summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-            savesum(sumfile, summary)
-        end
+        #for scheme in hocs
+        #    Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
+        #    foo, bar = "$tag-rand", tag * '-' * string(scheme)
+        #    scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
+        #    summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
+        #    savesum(sumfile, summary)
+        #end
     end
     open("$rst/scenario.par", "a") do io
         println(io, "Ended: ", time())
