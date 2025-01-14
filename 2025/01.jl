@@ -63,6 +63,34 @@ function readRst()
     mpg, vpg # mean and mean standard deviation
 end
 
+function readSup(dir)
+    r1 = deserialize("$dir/1/summary.ser")
+    r2 = deserialize("$dir/4/summary.ser")
+
+    mpg, vpg = [], []
+    for r in (r1, r2)
+        mps = Dict{String,DataFrame}()
+        vps = Dict{String,DataFrame}()
+        nrpt = r.repeat[end]
+        for grp in groupby(r, :scheme)
+            mps[grp.scheme[1]] = combine(
+                groupby(grp, :grt),
+                Not(:repeat, :scheme) .=> mean .=> Not(:repeat, :scheme),
+            )
+            tdf = combine(
+                groupby(grp, :grt),
+                Not(:repeat, :scheme, :grt, :nid) .=>
+                    std .=> Not(:repeat, :scheme, :grt, :nid),
+            )
+            vps[grp.scheme[1]] = select(tdf, Not(:grt)) ./ sqrt(nrpt)
+        end
+        push!(mpg, mps)
+        push!(vpg, vps)
+    end
+
+    mpg, vpg # mean and mean standard deviation
+end
+
 """
     line_clr(dat)
 Assign a fixed color to each line in `dat`. The colors are for all the figures.

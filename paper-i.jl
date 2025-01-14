@@ -172,13 +172,13 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
             savesum(sumfile, summary)
         end
-        #for scheme in hocs
-        #    Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
-        #    foo, bar = "$tag-rand", tag * '-' * string(scheme)
-        #    scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
-        #    summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
-        #    savesum(sumfile, summary)
-        #end
+        for scheme in hocs
+            Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
+            foo, bar = "$tag-rand", tag * '-' * string(scheme)
+            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
+            summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
+            savesum(sumfile, summary)
+        end
     end
     open("$rst/scenario.par", "a") do io
         println(io, "Ended: ", time())
