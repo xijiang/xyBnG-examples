@@ -63,6 +63,46 @@ function readRst()
     mpg, vpg # mean and mean standard deviation
 end
 
+"""
+    mrgRst(clr)
+Merge the two batches of one chromosome results into one dictionary.
+"""
+function mrgRst(clr)
+    isdir("c01/1") || mkpath("c01/1")
+    isdir("c01/4") || mkpath("c01/4")
+    ks = collect(keys(clr))
+    append!(ks, ["founder", "rand"])
+    for r in (1, 4)
+        rst = begin
+            t1 = deserialize("c01-1/$r/summary.ser")
+            t2 = deserialize("c01-2/$r/summary.ser")
+            t2.repeat .+= 50
+            append!(t1, t2)
+            t1
+        end
+        serialize("c01/$r/summary.ser", rst)
+        for i in 1:50
+            t1 = lpad(i, 2, '0')
+            t2 = lpad(i + 50, 3, '0')
+            for k in ks
+                for ext in ("xy", "ped")
+                    mv("c01-1/$r/$t1-$k.$ext", "c01/$r/0$t1-$k.$ext", force = true)
+                    mv("c01-2/$r/$t1-$k.$ext", "c01/$r/$t2-$k.$ext", force = true)
+                end
+            end
+            mv("c01-1/$r/$t1-snp.xy", "c01/$r/0$t1-snp.xy", force = true)
+            mv("c01-2/$r/$t1-snp.xy", "c01/$r/$t2-snp.xy", force = true)
+            mv("c01-1/$r/$t1-founder.lmp", "c01/$r/0$t1-founder.lmp", force = true)
+            mv("c01-2/$r/$t1-founder.lmp", "c01/$r/$t2-founder.lmp", force = true)
+        end
+        mv("c01-1/$r/BosTau.lmp", "c01/$r/BosTau-1.lmp", force = true)
+        mv("c01-2/$r/BosTau.lmp", "c01/$r/BosTau-2.lmp", force = true)
+        mv("c01-1/$r/BosTau.xy", "c01/$r/BosTau-1.xy", force = true)
+        mv("c01-2/$r/BosTau.xy", "c01/$r/BosTau-2.xy", force = true)
+        mv("c01-1/$r/desc.txt", "c01/$r/desc.txt", force = true)
+    end
+end
+
 function readSup(dir)
     r1 = deserialize("$dir/1/summary.ser")
     r2 = deserialize("$dir/4/summary.ser")
@@ -600,37 +640,37 @@ end
 
 """
     sum_frq_evo(clr, ds, file)
-Plot the evolution of allele frequency changes during the course of selection.
-The MAF are categorized into 399 groups. That is the occurrence number of of
-segregating allele 1. This is normalized by the total number of segregating
-loci. Only the frequencies of generation 1 and 30 are plotted.
+Summarize the evolution of allele frequency changes during the course of
+selection. The MAF are categorized into 399 groups. That is the occurrence
+number of of segregating allele 1. This is normalized by the total number of
+segregating loci. Only the frequencies of generation 1 and 30 are plotted.
 """
-function sum_frq_evo(clr, ds, file)
-    frq, ti, nhp = zeros(400, 2), zeros(Int, 3), 14400
+function sum_frq_evo(clr, dir, file)
+    frq, ti, nhp = zeros(399, 2), zeros(Int, 3), 14400
     open(file, "w") do bin
         for r in (1, 4)
+            rsm = deserialize("$dir/$r/summary.ser")
+            nrpt = rsm.repeat[end]
             for k in keys(clr)
-                print(k, ' ')
-                frq .= 0
-                for d in ds
-                    for i = 1:50
-                        tag = lpad(i, 2, '0')
-                        nlc = begin
-                            read!("$d/$r/$tag-$k.xy", ti)
-                            ti[2]
-                        end
-                        xy = mmap("$d/$r/$tag-$k.xy", Matrix{Int16}, (nlc, nhp), 24)
-                        for s in sum(isodd.(xy[:, 2001:2400]), dims = 2)
-                            s == 0 && continue
-                            frq[s, 1] += 1
-                        end
-                        for s in sum(isodd.(xy[:, 14001:14400]), dims = 2)
-                            s == 0 && continue
-                            frq[s, 2] += 1
-                        end
+                print(' ', k)
+                for i = 1:nrpt
+                    tag = lpad(i, ndigits(nrpt), '0')
+                    nlc = begin
+                        read!("$dir/$r/$tag-$k.xy", ti)
+                        ti[2]
+                    end
+                    xy = mmap("$dir/$r/$tag-$k.xy", Matrix{Int16}, (nlc, nhp), 24)
+                    for s in sum(isodd.(xy[:, 2001:2400]), dims = 2)
+                        (s == 0 || s == 400) && continue
+                        frq[s, 1] += 1
+                    end
+                    for s in sum(isodd.(xy[:, 14001:14400]), dims = 2)
+                        (s == 0 || s == 400) && continue
+                        frq[s, 2] += 1
                     end
                 end
                 write(bin, frq)
+                frq .= 0
             end
         end
     end
@@ -645,64 +685,67 @@ function moveavg(x, n)
 end
 
 function fig_frq_evo(clr, bin)
-    frq = zeros(400, 24)
+    frq = zeros(399, length(clr) * 4)
+    cg1 = length(clr) + 1
     read!(bin, frq)
     fs = []
-    ts = sum(frq[1:399, 1])
-    vs = vec(sum(frq[1:399, 2:2:12], dims = 1))
+    ts = sum(frq[:, 1]) # Total segregating loci
+    vs = vec(sum(frq[:, 2:2:12], dims = 1))
     ks = collect(keys(clr))[sortperm(vs, rev = true)]
     fig = plot(dpi = 300, size = (600, 400), legend = :top)
     for k in ks
         scatter!(
             fig,
             1:399,
-            frq[1:399, 2clr[k]] / ts,
+            frq[:, 2clr[k]] / ts,
             label = uppercase(k)[1:2],
             markerstrokewidth = 0,
             ms = 0.6,
             color = clr[k],
         )
-        ma = moveavg(frq[1:399, 2clr[k]] / ts, 5)
+        ma = moveavg(frq[:, 2clr[k]] / ts, 5)
         plot!(fig, 3:397, ma, color = clr[k], label = false)
     end
     scatter!(
         fig,
         1:399,
-        frq[1:399, 1] / ts,
+        frq[:, 1] / ts,
         label = L"G_1",
         markerstrokewidth = 0,
         ms = 0.6,
+        color = cg1,
     )
     ma = moveavg(frq[1:399, 1] / ts, 5)
-    plot!(fig, 3:397, ma, label = false)
+    plot!(fig, 3:397, ma, label = false, color = cg1)
     push!(fs, fig)
-    ts = sum(frq[1:399, 13])
-    vs = vec(sum(frq[1:399, 14:2:24], dims = 1))
+    ts = sum(frq[:, 13])
+    vs = vec(sum(frq[:, 14:2:24], dims = 1))
     ks = collect(keys(clr))[sortperm(vs, rev = true)]
     fig = plot(dpi = 300, size = (600, 400), legend = :top)
     for k in ks
         scatter!(
             fig,
             1:399,
-            frq[1:399, 2clr[k]+12] / ts,
+            frq[:, 2clr[k]+12] / ts,
             label = uppercase(k)[1:2],
             markerstrokewidth = 0,
             ms = 0.6,
             color = clr[k],
         )
-        ma = moveavg(frq[1:399, 2clr[k]+12] / ts, 5)
+        ma = moveavg(frq[:, 2clr[k]+12] / ts, 5)
         plot!(fig, 3:397, ma, color = clr[k], label = false)
     end
     scatter!(
         fig,
         1:399,
-        frq[1:399, 13] / ts,
+        frq[:, 13] / ts,
         label = L"G_{1}",
         markerstrokewidth = 0,
         ms = 0.6,
+        color = cg1,
     )
-    ma = moveavg(frq[1:399, 13] / ts, 5)
-    plot!(fig, 3:397, ma, label = false)
+    ma = moveavg(frq[:, 13] / ts, 5)
+    plot!(fig, 3:397, ma, label = false, color = cg1)
     push!(fs, fig)
     plot(fs..., layout = (1, 2), size = (800, 400))
     savefig("test.pdf")
@@ -790,5 +833,62 @@ function all_fig()
         fig_frq_evo(clr, "ch29.bin")
         mv("test.pdf", "frq-evo-29.pdf", force = true)
         mv("test.png", "frq-evo-29.png", force = true)
+    end
+end
+
+function sup_fig(dir)
+    mpg, vpg = readSup(dir)
+    clr = line_clr(mpg[1]) # Assign a fixed color to each scheme
+    chr = dir[end-1:end]
+
+    begin # Figure of mean TBV
+        fig_mtbv(mpg, vpg, clr)
+        mv("mtbv.pdf", "mtbv-$chr.pdf", force = true)
+        mv("mtbv.png", "mtbv-$chr.png", force = true)
+    end
+
+    begin # Figure of number of parents
+        p = chr == "01" ? 0 : 3
+        fig_nprt(mpg, vpg, clr; p = p)
+        mv("nprt.pdf", "nprt-$chr.pdf", force = true)
+        mv("nprt.png", "nprt-$chr.png", force = true)
+    end
+
+    begin # Figure of genic and genetic variance
+        fig_vg(mpg, vpg, clr)
+        mv("vg.pdf", "vg-$chr.pdf", force = true)
+        mv("vg.png", "vg-$chr.png", force = true)
+    end
+
+    begin # Figure of space between breeding ceiling and floor
+        p = chr == "01" ? -10 : -8
+        fig_space(mpg, vpg, clr; p = p)
+        mv("space.pdf", "space-$chr.pdf", force = true)
+        mv("space.png", "space-$chr.png", force = true)
+    end
+
+    begin # Figure of inbreeding
+        fig_inbreeding(mpg, vpg, clr)
+        mv("inbreeding.pdf", "inbreeding-$chr.pdf", force = true)
+        mv("inbreeding.png", "inbreeding-$chr.png", force = true)
+    end
+
+    begin # Figure of fixed QTL
+        fig_fxqtl(mpg, vpg, clr)
+        mv("fixed-qtl.pdf", "fixed-qtl-$chr.pdf", force = true)
+        mv("fixed-qtl.png", "fixed-qtl-$chr.png", force = true)
+    end
+
+    begin # Figure of propotion loci fixed
+        fig_prp_fixed(mpg, vpg, clr)
+        mv("prp-fixed-1.pdf", "prp-fixed-$chr.pdf", force = true)
+        mv("prp-fixed-1.png", "prp-fixed-$chr.png", force = true)
+    end
+
+    begin # Evolution of allele frequency
+        isfile("ch-$chr.bin") || sum_frq_evo(clr, ["$dir"], "ch-$chr.bin")
+        fig_frq_evo(clr, "ch-$chr.bin")
+        mv("test.pdf", "frq-evo-$chr.pdf", force = true)
+        mv("test.png", "frq-evo-$chr.png", force = true)
     end
 end
