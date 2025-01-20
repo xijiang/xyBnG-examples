@@ -406,8 +406,8 @@ function fig_inbreeding(mpg, vpg, clr)
     ylm = begin
         t = collect(xtrm(mpg, :fibd))
         append!(t, xtrm(mpg, :fped))
-        append!(t, xtrm(mpg, :fhet3))
-        append!(t, xtrm(mpg, :fdrift3))
+        append!(t, xtrm(mpg, :fhet2))
+        append!(t, xtrm(mpg, :fdrift2))
         extrema(t)
     end
     fs, n = [], length(mpg)
@@ -449,15 +449,15 @@ function fig_inbreeding(mpg, vpg, clr)
         i == 2 && annotate!(fig, 15, ylm[2], text("Pedigree", 10))
         push!(fs, fig)
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
-        ks = ord_last(mpg[i], :fhet3)
+        ks = ord_last(mpg[i], :fhet2)
         for s in ks
             df = mpg[i][s]
             plot!(
                 fig,
                 df.grt .- 5,
-                df.fhet3,
+                df.fhet2,
                 fillalpha = 0.2,
-                ribbon = vpg[i][s].fhet3,
+                ribbon = vpg[i][s].fhet2,
                 label = uppercase(s[1:2]),
                 legend = :topleft,
                 legendfontsize = 6,
@@ -467,15 +467,15 @@ function fig_inbreeding(mpg, vpg, clr)
         i == 2 && annotate!(fig, 15, ylm[2], text("Het.", 10))
         push!(fs, fig)
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
-        ks = ord_last(mpg[i], :fdrift3)
+        ks = ord_last(mpg[i], :fdrift2)
         for s in ks
             df = mpg[i][s]
             plot!(
                 fig,
                 df.grt .- 5,
-                df.fdrift3,
+                df.fdrift2,
                 fillalpha = 0.2,
-                ribbon = vpg[i][s].fdrift3,
+                ribbon = vpg[i][s].fdrift2,
                 label = uppercase(s[1:2]),
                 legend = :topleft,
                 legendfontsize = 6,
