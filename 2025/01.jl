@@ -104,8 +104,8 @@ function mrgRst(clr)
 end
 
 function readSup(dir)
-    r1 = deserialize("$dir/1/summary.ser")
-    r2 = deserialize("$dir/4/summary.ser")
+    r1 = deserialize(joinpath(dir, "1/summary.ser"))
+    r2 = deserialize(joinpath(dir, "4/summary.ser"))
 
     mpg, vpg = [], []
     for r in (r1, r2)
@@ -180,14 +180,15 @@ function ord_last(data, col)
 end
 
 """
-    fig_mtbv(mpg, vpg, clr)
+    fig_mtbv(mpg, vpg, clr; c = 1)
 Plot the mean total breeding value of each generation of each scheme in `mpg`.
 The shaded areas are the standard errors.
 Each scheme is plotted in a fixed color defined in `clr`.
 """
-function fig_mtbv(mpg, vpg, clr)
+function fig_mtbv(mpg, vpg, clr; c = 1)
     ylm = xtrm(mpg, :mtbv)
     fs, n = [], length(mpg)
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :mtbv)
@@ -214,26 +215,31 @@ function fig_mtbv(mpg, vpg, clr)
         ylm[2] * 0.9,
         text(L"\overline{\mathrm{TBV}}", 10, :left, rotation = 90),
     )
+    p = ylm[2] * 0.9
+    annotate!(fs[1], 2, p, text(ch * L"K_{05}", 5))
     annotate!(fs[2], 15, 0, text("Generation", 10, :bottom))
+    annotate!(fs[2], 2, p, text(ch * L"K_{10}", 5))
     plot(fs..., layout = (1, 2), size = (800, 400))
-    savefig("mtbv.pdf")
-    savefig("mtbv.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("mtbv-$chr.pdf")
+    savefig("mtbv-$chr.png")
 end
 
 """
-    fig_nprt(mpg, vpg, clr)
+    fig_nprt(mpg, vpg, clr; p = 0, c = 1)
 Plot the number of parents of each generation of each scheme in `mpg`. The
 shaded areas are the standard errors. Each scheme is plotted in a fixed color
 defined in `clr`. The solid lines are the number of sires and the dashed lines
 are the number of dams. Legends are in two columns. They read column by column.
 """
-function fig_nprt(mpg, vpg, clr; p = 0)
+function fig_nprt(mpg, vpg, clr; p = 0, c = 1)
     ylm = begin
         t = collect(xtrm(mpg, :nsire))
         append!(t, xtrm(mpg, :ndam))
         extrema(t)
     end
     fs, n, rg = [], length(mpg), 7:35
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :nsire)
@@ -268,10 +274,14 @@ function fig_nprt(mpg, vpg, clr; p = 0)
         ylm[2] * 0.8,
         text(L"\overline{N_{\mathrm{parent}}}", 10, :left, rotation = 90),
     )
+    p = ylm[2] * 0.9
+    annotate!(fs[1], 5, p, text(ch * L"K_{05}", 5))
     annotate!(fs[2], 25, 1, text("Generation", 10, :bottom))
+    annotate!(fs[2], 5, p, text(ch * L"K_{10}", 5))
     plot(fs..., layout = (1, 2), size = (800, 400))
-    savefig("nprt.pdf")
-    savefig("nprt.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("nprt-$chr.pdf")
+    savefig("nprt-$chr.png")
 end
 
 """
@@ -282,13 +292,14 @@ is plotted in a fixed color defined in `clr`. The solid lines are the genic var
 and the dashed lines are genetic variances. Legends are in the bottom left
 corner.
 """
-function fig_vg(mpg, vpg, clr)
+function fig_vg(mpg, vpg, clr; c = 1)
     ylm = begin
         t = collect(xtrm(mpg, :vtbv))
         append!(t, xtrm(mpg, :genicv))
         extrema(t)
     end
     fs, n = [], length(mpg)
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :genicv)
@@ -323,28 +334,33 @@ function fig_vg(mpg, vpg, clr)
         ylm[1] + 0.33 * (ylm[2] - ylm[1]),
         text("Genic/genetic variance", 10, :left, rotation = 90),
     )
+    p = ylm[2] * 0.95
+    annotate!(fs[1], 10, p, text(ch * L"K_{05}", 5))
     h = (ylm[2] - ylm[1]) * 0.02 + ylm[1]
     annotate!(fs[2], 19, h, text("Generation", 10, :bottom))
+    annotate!(fs[2], 10, p, text(ch * L"K_{10}", 5))
     plot(fs..., layout = (1, 2), size = (800, 400))
-    savefig("vg.pdf")
-    savefig("vg.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("vg-$chr.pdf")
+    savefig("vg-$chr.png")
 end
 
 """
-    fig_space(mpg, vpg, clr)
+    fig_space(mpg, vpg, clr; p = -10, c = 1)
 Plot the space limited by breeding ceiling and floor of each generation of each
 scheme in `mpg`. The shaded areas are the mean standard deviations. Each scheme
 is plotted in a fixed color defined in `clr`. The solid lines are the breeding
 ceiling and the dashed lines are breeding floor. Legends are in the bottom left
 corner.
 """
-function fig_space(mpg, vpg, clr; p = -10)
+function fig_space(mpg, vpg, clr; p = -10, c = 1)
     ylm = begin
         t = collect(xtrm(mpg, :ceiling))
         append!(t, xtrm(mpg, :floor))
         extrema(t)
     end
     fs, n = [], length(mpg)
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :ceiling)
@@ -383,16 +399,20 @@ function fig_space(mpg, vpg, clr; p = -10)
         ylm[2] * 0.57, #-8 for 3:4
         text("Brd. val.", 10, :left, rotation = 90),
     )
+    pp = ylm[2] * 0.9
+    annotate!(fs[1], 5, pp, text(ch * L"K_{05}", 5))
     annotate!(fs[1], 20, ylm[1] * 0.52, text("Floor", 10, :top))
     annotate!(fs[1], 20, ylm[2] * 0.52, text("Ceiling", 10, :bottom))
     annotate!(fs[2], 25, ylm[1], text("Generation", 10, :bottom))
+    annotate!(fs[2], 5, pp, text(ch * L"K_{10}", 5))
     plot(fs..., layout = (1, 2), size = (800, 400))
-    savefig("space.pdf")
-    savefig("space.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("space-$chr.pdf")
+    savefig("space-$chr.png")
 end
 
 """
-    fig_inbreeding(mpg, vpg, clr)
+    fig_inbreeding(mpg, vpg, clr; c = 1)
 Inbreeding:
     - IBD: Identity by descent
     - Pedigree: Pedigree based inbreeding
@@ -402,7 +422,7 @@ Plot the inbreeding of each generation of each scheme in `mpg`. The shaded
 areas are the mean standard deviations. Each scheme is plotted in a fixed color
 defined in `clr`. Legends are in the top left corner.
 """
-function fig_inbreeding(mpg, vpg, clr)
+function fig_inbreeding(mpg, vpg, clr; c = 1)
     ylm = begin
         t = collect(xtrm(mpg, :fibd))
         append!(t, xtrm(mpg, :fped))
@@ -411,6 +431,7 @@ function fig_inbreeding(mpg, vpg, clr)
         extrema(t)
     end
     fs, n = [], length(mpg)
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fibd)
@@ -487,25 +508,34 @@ function fig_inbreeding(mpg, vpg, clr)
     end
     h = (ylm[2] - ylm[1]) * 0.05 + ylm[1]
     annotate!(fs[8], 21, h, text("Generation", 8, :bottom))
+    p = ylm[2] * 0.85
+    for i in 1:4
+        annotate!(fs[i], 10, p, text(ch * L"K_{05}", 5))
+    end
+    for i in 5:8
+        annotate!(fs[i], 10, p, text(ch * L"K_{10}", 5))
+    end
     plot(fs..., layout = (2, 4), size = (800, 400))
-    savefig("inbreeding.pdf")
-    savefig("inbreeding.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("inbreeding-$chr.pdf")
+    savefig("inbreeding-$chr.png")
 end
 
 """
-    fig_fxqtl(mpg, vpg, clr)
+    fig_fxqtl(mpg, vpg, clr; c = 1)
 Plot the number of fixed QTL of each generation of each scheme in `mpg`. The
 shaded areas are the mean standard deviations. Each scheme is plotted in a fixed
 color defined in `clr`. The solid lines are the number of favorite QTL and the
 dashed lines are the number of unfavorite QTL. Legends are in the right side.
 """
-function fig_fxqtl(mpg, vpg, clr)
+function fig_fxqtl(mpg, vpg, clr; c = 1)
     ylm = begin
         t = collect(xtrm(mpg, :xfq))
         append!(t, xtrm(mpg, :xuq))
         extrema(t)
     end
     fs, n = [], length(mpg)
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :xfq)
@@ -551,10 +581,16 @@ function fig_fxqtl(mpg, vpg, clr)
         ylm[2] * 0.65,
         text("Number of fixed QTL", 8, :left, rotation = 90),
     )
+    p = ylm[2] * 0.9
+    annotate!(fs[1], 10, p, text(ch * L"K_{05}", 5))
+    annotate!(fs[2], 10, p, text(ch * L"K_{05}", 5))
     annotate!(fs[4], 20, 0, text("Generation", 8, :bottom))
+    annotate!(fs[3], 10, p, text(ch * L"K_{10}", 5))
+    annotate!(fs[4], 10, p, text(ch * L"K_{10}", 5))
     plot(fs..., layout = (1, 4), size = (800, 400))
-    savefig("fixed-qtl.pdf")
-    savefig("fixed-qtl.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("fixed-qtl-$chr.pdf")
+    savefig("fixed-qtl-$chr.png")
 end
 
 """
@@ -565,8 +601,8 @@ color defined in `clr`. The solid lines are the proportion of QTL fixed, the
 dashed lines are the proportion of reference fixed, and the dotted lines are the
 proportion of chip fixed. Legends are in the bottom right corner.
 """
-function fig_prp_fixed(mpg, vpg, clr; s = 1)
-    tt = s == 1 ? (637, 3184) : (10000, 50000)
+function fig_prp_fixed(mpg, vpg, clr; c = 1)
+    tt = c == 1 ? (637, 3184) : (10000, 50000)
     ylm = begin
         t = collect(xtrm(mpg, :xqtl)) ./ tt[1]
         append!(t, xtrm(mpg, :xref) ./ tt[1])
@@ -574,6 +610,7 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
         extrema(t)
     end
     fs, n = [], length(mpg)
+    ch = c == 1 ? L"C_{01}" : L"C_{29}"
 
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
@@ -632,10 +669,18 @@ function fig_prp_fixed(mpg, vpg, clr; s = 1)
         push!(fs, fig)
     end
     annotate!(fs[1], -3.5, ylm[2] * 0.45, text("Prop. loci fixed", 8, :left, rotation = 90))
+    p = ylm[2] * 0.9
+    for i in 1:3
+        annotate!(fs[i], 5, p, text(ch * L"K_{05}", 5))
+    end
     annotate!(fs[6], 15, 0, text("Generation", 8, :bottom))
+    for i in 4:6
+        annotate!(fs[i], 5, p, text(ch * L"K_{10}", 5))
+    end
     plot(fs..., layout = (2, 3), size = (800, 400))
-    savefig("prp-fixed-$s.pdf")
-    savefig("prp-fixed-$s.png")
+    chr = c == 1 ? "01" : "29"
+    savefig("prp-fixed-$chr.pdf")
+    savefig("prp-fixed-$chr.png")
 end
 
 """
@@ -693,6 +738,7 @@ function fig_frq_evo(clr, bin)
     vs = vec(sum(frq[:, 2:2:12], dims = 1))
     ks = collect(keys(clr))[sortperm(vs, rev = true)]
     fig = plot(dpi = 300, size = (600, 400), legend = :top)
+    ch = occursin("01", bin) ? L"C_{01}" : L"C_{29}"
     for k in ks
         scatter!(
             fig,
@@ -717,6 +763,8 @@ function fig_frq_evo(clr, bin)
     )
     ma = moveavg(frq[1:399, 1] / ts, 5)
     plot!(fig, 3:397, ma, label = false, color = cg1)
+    p = maximum(frq[:, 1] / ts) * 0.9
+    annotate!(fig, 50, p, text(ch * L"K_{05}", 5))
     push!(fs, fig)
     ts = sum(frq[:, 13])
     vs = vec(sum(frq[:, 14:2:24], dims = 1))
@@ -746,10 +794,13 @@ function fig_frq_evo(clr, bin)
     )
     ma = moveavg(frq[:, 13] / ts, 5)
     plot!(fig, 3:397, ma, label = false, color = cg1)
+    p = maximum(frq[:, 13] / ts) * 0.9
+    annotate!(fig, 50, p, text(ch * L"K_{10}", 5))
     push!(fs, fig)
     plot(fs..., layout = (1, 2), size = (800, 400))
-    savefig("test.pdf")
-    savefig("test.png")
+    chr = occursin("01", bin) ? "01" : "29"
+    savefig("frq-evo-$chr.pdf")
+    savefig("frq-evo-$chr.png")
 end
 
 """
@@ -840,55 +891,30 @@ function sup_fig(dir)
     mpg, vpg = readSup(dir)
     clr = line_clr(mpg[1]) # Assign a fixed color to each scheme
     chr = dir[end-1:end]
+    c = chr == "01" ? 1 : 2
 
-    begin # Figure of mean TBV
-        fig_mtbv(mpg, vpg, clr)
-        mv("mtbv.pdf", "mtbv-$chr.pdf", force = true)
-        mv("mtbv.png", "mtbv-$chr.png", force = true)
-    end
-
+    fig_mtbv(mpg, vpg, clr; c = c)
+    
     begin # Figure of number of parents
         p = chr == "01" ? 0 : 3
-        fig_nprt(mpg, vpg, clr; p = p)
-        mv("nprt.pdf", "nprt-$chr.pdf", force = true)
-        mv("nprt.png", "nprt-$chr.png", force = true)
+        fig_nprt(mpg, vpg, clr; p = p, c = c)
     end
 
-    begin # Figure of genic and genetic variance
-        fig_vg(mpg, vpg, clr)
-        mv("vg.pdf", "vg-$chr.pdf", force = true)
-        mv("vg.png", "vg-$chr.png", force = true)
-    end
+    fig_vg(mpg, vpg, clr; c = c)
 
     begin # Figure of space between breeding ceiling and floor
         p = chr == "01" ? -10 : -8
-        fig_space(mpg, vpg, clr; p = p)
-        mv("space.pdf", "space-$chr.pdf", force = true)
-        mv("space.png", "space-$chr.png", force = true)
+        fig_space(mpg, vpg, clr; p = p, c = c)
     end
 
-    begin # Figure of inbreeding
-        fig_inbreeding(mpg, vpg, clr)
-        mv("inbreeding.pdf", "inbreeding-$chr.pdf", force = true)
-        mv("inbreeding.png", "inbreeding-$chr.png", force = true)
-    end
+    fig_inbreeding(mpg, vpg, clr; c = c)
 
-    begin # Figure of fixed QTL
-        fig_fxqtl(mpg, vpg, clr)
-        mv("fixed-qtl.pdf", "fixed-qtl-$chr.pdf", force = true)
-        mv("fixed-qtl.png", "fixed-qtl-$chr.png", force = true)
-    end
-
-    begin # Figure of propotion loci fixed
-        fig_prp_fixed(mpg, vpg, clr)
-        mv("prp-fixed-1.pdf", "prp-fixed-$chr.pdf", force = true)
-        mv("prp-fixed-1.png", "prp-fixed-$chr.png", force = true)
-    end
+    fig_fxqtl(mpg, vpg, clr) # Figure of fixed QTL
+    
+    fig_prp_fixed(mpg, vpg, clr; c = c) # Figure of propotion loci fixed
 
     begin # Evolution of allele frequency
-        isfile("ch-$chr.bin") || sum_frq_evo(clr, ["$dir"], "ch-$chr.bin")
+        isfile("ch-$chr.bin") || sum_frq_evo(clr, dir, "ch-$chr.bin")
         fig_frq_evo(clr, "ch-$chr.bin")
-        mv("test.pdf", "frq-evo-$chr.pdf", force = true)
-        mv("test.png", "frq-evo-$chr.png", force = true)
     end
 end
