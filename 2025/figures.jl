@@ -373,6 +373,8 @@ function fig_inbreeding(mpg, vpg, clr; c = 1)
         append!(t, xtrm(mpg, :fped))
         append!(t, xtrm(mpg, :fhet2))
         append!(t, xtrm(mpg, :fdrift2))
+        append!(t, xtrm(mpg, :fhet3))
+        append!(t, xtrm(mpg, :fdrift3))
         extrema(t)
     end
     fs, n = [], length(mpg)
@@ -396,6 +398,7 @@ function fig_inbreeding(mpg, vpg, clr; c = 1)
         end
         i == 2 && annotate!(fig, 15, ylm[2], text("IBD", 10))
         push!(fs, fig)
+
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fped)
         for s in ks
@@ -414,6 +417,7 @@ function fig_inbreeding(mpg, vpg, clr; c = 1)
         end
         i == 2 && annotate!(fig, 15, ylm[2], text("Pedigree", 10))
         push!(fs, fig)
+
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fhet2)
         for s in ks
@@ -430,8 +434,28 @@ function fig_inbreeding(mpg, vpg, clr; c = 1)
                 color = clr[s],
             )
         end
-        i == 2 && annotate!(fig, 15, ylm[2], text("Het.", 10))
+        i == 2 && annotate!(fig, 15, ylm[2], text("Het. ref", 10))
         push!(fs, fig)
+
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
+        ks = ord_last(mpg[i], :fhet3)
+        for s in ks
+            df = mpg[i][s]
+            plot!(
+                fig,
+                df.grt .- 5,
+                df.fhet3,
+                fillalpha = 0.2,
+                ribbon = vpg[i][s].fhet3,
+                label = uppercase(s[1:2]),
+                legend = :topleft,
+                legendfontsize = 6,
+                color = clr[s],
+            )
+        end
+        i == 2 && annotate!(fig, 15, ylm[2], text("Het. chip", 10))
+        push!(fs, fig)
+
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
         ks = ord_last(mpg[i], :fdrift2)
         for s in ks
@@ -448,20 +472,39 @@ function fig_inbreeding(mpg, vpg, clr; c = 1)
                 color = clr[s],
             )
         end
-        i == 2 && annotate!(fig, 15, ylm[2], text("Drift", 10))
+        i == 2 && annotate!(fig, 15, ylm[2], text("Drift ref", 10))
+        push!(fs, fig)
+
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
+        ks = ord_last(mpg[i], :fdrift3)
+        for s in ks
+            df = mpg[i][s]
+            plot!(
+                fig,
+                df.grt .- 5,
+                df.fdrift3,
+                fillalpha = 0.2,
+                ribbon = vpg[i][s].fdrift3,
+                label = uppercase(s[1:2]),
+                legend = :topleft,
+                legendfontsize = 6,
+                color = clr[s],
+            )
+        end
+        i == 2 && annotate!(fig, 15, ylm[2], text("Drift chip", 10))
         push!(fs, fig)
     end
     h = (ylm[2] - ylm[1]) * 0.05 + ylm[1]
     annotate!(fs[8], 21, h, text("Generation", 8, :bottom))
     p = ylm[2] * 0.85
-    CS = 'A':'H'
-    for i in 1:4
-        annotate!(fs[i], 10, p, text(CS[i] * ": " * ch * L"F_{0.5\%}", 5))
+    CS = 'A':'Z'
+    for i in 1:6
+        annotate!(fs[i], 15, p, text(CS[i] * ": " * ch * L"F_{0.5\%}", 5))
     end
-    for i in 5:8
-        annotate!(fs[i], 10, p, text(CS[i] * ": " * ch * L"F_{1\%}", 5))
+    for i in 7:12
+        annotate!(fs[i], 15, p, text(CS[i] * ": " * ch * L"F_{1\%}", 5))
     end
-    plot(fs..., layout = (2, 4), size = (800, 400))
+    plot(fs..., layout = (2, 6), size = (1100, 550))
     chr = c == 1 ? "01" : "29"
     savefig("inbreeding-$chr.pdf")
     savefig("inbreeding-$chr.png")
