@@ -815,7 +815,7 @@ function sup_fig(dir)
 
     fig_inbreeding(mpg, vpg, clr; c = c)
 
-    fig_fxqtl(mpg, vpg, clr) # Figure of fixed QTL
+    fig_fxqtl(mpg, vpg, clr; c = c) # Figure of fixed QTL
     
     fig_prp_fixed(mpg, vpg, clr; c = c) # Figure of propotion loci fixed
 
