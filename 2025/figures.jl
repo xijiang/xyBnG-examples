@@ -213,17 +213,27 @@ function fig_nprt(mpg, vpg, clr; p = 0, c = 1)
         end
         push!(fs, fig)
     end
-    annotate!(
-        fs[1],
-        1.5,
-        ylm[2] * 0.8,
-        text(L"\overline{N_{\mathrm{parent}}}", 10, :left, rotation = 90),
-    )
     p = ylm[2] * 0.9
-    annotate!(fs[1], 5, p, text("A: " * ch * L"F_{0.5\%}", 5))
+    if c == 1
+        annotate!(
+            fs[1],
+            1.5,
+            ylm[2] * 0.8,
+            text(L"\overline{N_{\mathrm{parent}}}", 10, :left, rotation = 90),
+        )
+        annotate!(fs[1], 5, p, text("A: " * ch * L"F_{0.5\%}", 5))
+    else
+        annotate!(fs[1], 5, p / 9, text("A: " * ch * L"F_{1\%}", 5))
+        annotate!(
+            fs[1],
+            -1.5,
+            ylm[2] * 0.8,
+            text(L"\overline{N_{\mathrm{parent}}}", 10, :left, rotation = 90),
+        )
+    end
     annotate!(fs[2], 25, 1, text("Generation", 10, :bottom))
     annotate!(fs[2], 5, p, text("B: " * ch * L"F_{1\%}", 5))
-    plot(fs..., layout = (1, 2), size = (800, 400))
+    plot(fs..., layout = (1, 2), size = (800, 300))
     chr = c == 1 ? "01" : "29"
     savefig("nprt-$chr.pdf")
     savefig("nprt-$chr.png")
