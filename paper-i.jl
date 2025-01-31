@@ -22,7 +22,9 @@ function fhmlg(ped, xy)
 end
 
 function paper_1_tk(bdir, dF, nrng, rst; nrpt = 100, ε = 1e-6)
-    plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
+    plan = Plan(25, 50, 200; mate = :random)
+    plnb = Plan(50, 50, 200; mate = :random)
+    fixed = ["grt"]
     nsel, maf = 30, 0.0
     species = Cattle(5_000)
     lgnm = 24.89385779     # length of genome in Morgen
@@ -92,7 +94,9 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
     end
     nchr = length(chr)
     ε = nchr < 5 ? 1e-6 : 0.0
-    plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
+    plan = Plan(25, 50, 200; mate = :random)
+    plnb = Plan(50, 50, 200; mate = :random)
+    fixed = ["grt"]
     nsel, maf, hist, mr = 30, 0.0, 5000, 4.0
     species = Cattle(plan.noff)
     lgnm = 24.89385779     # length of genome in Morgen
@@ -194,7 +198,9 @@ function pge(chr, dF, nrng, rst; nrpt = 100)
     end
     nchr = length(chr)
     ε = nchr < 5 ? 1e-6 : 0.0
-    plan, plnb, fixed = Plan(25, 50, 200), Plan(50, 50, 200), ["grt"]
+    plan = Plan(25, 50, 200; mate = :random)
+    plnb = Plan(50, 50, 200; mate = :random)
+    fixed = ["grt"]
     nsel, maf, hist, mr = 30, 0.0, 5000, 4.0
     species = Cattle(plan.noff)
     lgnm = 24.89385779     # length of genome in Morgen
