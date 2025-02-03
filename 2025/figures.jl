@@ -826,11 +826,140 @@ function fig_frq_evo(clr, bin, tag)
     fs
 end
 
+function fig_frfe(mpg, clr; c = 1)
+    fgs, fre, m = [], zeros(29, 12), 0
+    for i in 1:2
+        for k in keys(clr)
+            m += 1
+            fibd = mpg[i][k].fibd
+            nsir = mpg[i][k].nsire
+            ndam = mpg[i][k].ndam
+            for i in 7:35
+                fr = (fibd[i+1] - fibd[i]) / (1 - fibd[i])
+                fe = 1/8nsir[i] + 1/8ndam[i]
+                fre[i-6, m] = fr / fe
+            end
+        end
+    end
+    ylm = extrema(fre) .* (.90, 1.1)
+    A, B = c == 1 ? ('A', 'B') : ('C', 'D')
+    tag = c == 1 ? L"C_{1}" : L"C_{29}"
+    for i in 1:2
+        dat = i==1 ? view(fre, :, 1:6) : view(fre, :, 7:12)
+        ks = collect(keys(clr))
+        ks = ks[sortperm(vec(sum(dat, dims = 1)), rev = true)]
+        fig = plot(ylim = ylm, dpi = 300,
+            legendfontsize = 6,
+            foreground_color_legend = nothing,
+            background_color_legend = nothing,)
+        for k in ks
+            scatter!(
+                fig,
+                2:30,
+                dat[:, clr[k]],
+                label = uppercase(k)[1:2],
+                ms = 1,
+                markerstrokewidth = 0,
+                smooth = true,
+                color = clr[k],
+                )
+            plot!(
+                fig,
+                2:30,
+                dat[:, clr[k]],
+                ls = :dot,
+                lw = 0.4,
+                label = false,
+                color = clr[k],
+            )
+        end
+        txt = i == 1 ? "$A: " * tag * L"F_{0.5\%}" : "$B: " * tag * L"F_{1\%}"
+        annotate!(fig, 15, ylm[2] * 0.9, text(txt, 6, :bottom))
+        push!(fgs, fig)
+    end
+    if c == 2
+        annotate!(fgs[1], -0.6, ylm[2] * .95, text(L"\frac{\Delta F_R}{\Delta F_E}", 6, :bottom))
+        annotate!(fgs[2], 28, ylm[1] * 1.1, text("Generation", 6, :bottom))
+    end
+    fgs
+end
+
+function fig_dbv_df(mpg, clr; c = 1)
+    fgs, dbvf, m = [], zeros(29, 12), 0
+    for i in 1:2
+        for k in keys(clr)
+            m += 1
+            mtbv = mpg[i][k].mtbv
+            fibd = mpg[i][k].fibd
+            dbvf[:, m] = (mtbv[8:36] - mtbv[7:35]) ./ (fibd[8:36] - fibd[7:35]) .* (1 .- fibd[7:35])
+        end
+    end
+    ylm = extrema(dbvf) .* (.90, 1.1)
+    A, B = c == 1 ? ('A', 'B') : ('C', 'D')
+    tag = c == 1 ? L"C_{1}" : L"C_{29}"
+    for i in 1:2
+        dat = i==1 ? view(dbvf, :, 1:6) : view(dbvf, :, 7:12)
+        ks = collect(keys(clr))
+        ks = ks[sortperm(vec(sum(dat, dims = 1)), rev = true)]
+        fig = plot(dpi = 300,
+            legendfontsize = 6,
+            foreground_color_legend = nothing,
+            background_color_legend = nothing,)
+        for k in ks
+            scatter!(
+                fig,
+                2:30,
+                dat[:, clr[k]],
+                label = uppercase(k)[1:2],
+                ms = 1,
+                markerstrokewidth = 0,
+                smooth = true,
+                color = clr[k],
+                )
+            plot!(
+                fig,
+                2:30,
+                dat[:, clr[k]],
+                ls = :dot,
+                lw = 0.4,
+                label = false,
+                color = clr[k],
+            )
+        end
+        txt = i == 1 ? "$A: " * tag * L"F_{0.5\%}" : "$B: " * tag * L"F_{1\%}"
+        annotate!(fig, 15, ylm[2] * 0.9, text(txt, 6, :bottom))
+        push!(fgs, fig)
+    end
+    if c == 2
+        annotate!(fgs[1], -.8, ylm[2] * .88, text(L"\frac{\Delta BV}{\Delta F}", 6, :bottom))
+        annotate!(fgs[2], 27.5, ylm[1] * .8, text("Generation", 5, :bottom))
+    end
+    fgs
+end
+
 function sup_fig(dir)
     a, b = readSup("$dir/c01")
     c, d = readSup("$dir/c29")
     clr = line_clr(a[1]) # Assign a fixed color to each scheme
     
+    begin # dTBV/dF
+        fs = fig_dbv_df(a, clr; c = 1)
+        append!(fs, fig_dbv_df(c, clr; c = 2))
+        plot(fs..., layout = (2, 2), size = (800, 450))
+        savefig("dbv-vs-df.pdf")
+        savefig("dbv-vs-df.png")
+    end
+
+    begin # F_r/F_e
+        fs = fig_frfe(a, clr; c = 1)
+        append!(fs, fig_frfe(c, clr; c = 2))
+        plot(fs..., layout = (2, 2), size = (800, 450))
+        savefig("fr-vs-fe.pdf")
+        savefig("fr-vs-fe.png")
+    end
+
+    return
+
     begin # Figure of number of parents
         fs = fig_nprt(a, b, clr; p = 0, c = 1)
         append!(fs, fig_nprt(c, d, clr; p = 3, c = 2))
@@ -847,13 +976,13 @@ function sup_fig(dir)
         savefig("mtbv.png")
     end
 
-    begin # Figure of space between breeding ceiling and floor
-        fs = fig_space(a, b, clr; p = -11, c = 1)
-        append!(fs, fig_space(c, d, clr; p = -11, c = 2))
-        plot(fs..., layout = (2, 2), size = (800, 450))
-        savefig("space.pdf")
-        savefig("space.png")
-    end
+    # begin # Figure of space between breeding ceiling and floor
+    #     fs = fig_space(a, b, clr; p = -11, c = 1)
+    #     append!(fs, fig_space(c, d, clr; p = -11, c = 2))
+    #     plot(fs..., layout = (2, 2), size = (800, 450))
+    #     savefig("space.pdf")
+    #     savefig("space.png")
+    # end
 
     begin # Figure of genic and genetic variance
         fs = fig_vg(a, b, clr; c = 1)

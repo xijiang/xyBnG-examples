@@ -23,7 +23,7 @@ end
 
 function paper_1_tk(bdir, dF, nrng, rst; nrpt = 100, ε = 1e-6)
     plan = Plan(25, 50, 200; mate = :random)
-    plnb = Plan(50, 50, 200; mate = :random)
+    plnb = Plan(75, 75, 200; mate = :random)
     fixed = ["grt"]
     nsel, maf = 30, 0.0
     species = Cattle(5_000)
@@ -95,7 +95,7 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
     nchr = length(chr)
     ε = nchr < 5 ? 1e-6 : 0.0
     plan = Plan(25, 50, 200; mate = :random)
-    plnb = Plan(50, 50, 200; mate = :random)
+    plnb = Plan(75, 75, 200; mate = :random)
     fixed = ["grt"]
     nsel, maf, hist, mr = 30, 0.0, 5000, 4.0
     species = Cattle(plan.noff)
@@ -199,7 +199,7 @@ function pge(chr, dF, nrng, rst; nrpt = 100)
     nchr = length(chr)
     ε = nchr < 5 ? 1e-6 : 0.0
     plan = Plan(25, 50, 200; mate = :random)
-    plnb = Plan(50, 50, 200; mate = :random)
+    plnb = Plan(75, 75, 200; mate = :random)
     fixed = ["grt"]
     nsel, maf, hist, mr = 30, 0.0, 5000, 4.0
     species = Cattle(plan.noff)
