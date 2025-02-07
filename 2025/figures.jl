@@ -58,10 +58,12 @@ function readSup(dir)
         vps = Dict{String,DataFrame}()
         nrpt = r.repeat[end]
         for grp in groupby(r, :scheme)
-            mps[grp.scheme[1]] = combine(
+            scheme = grp.scheme[1]
+            mps[scheme] = combine(
                 groupby(grp, :grt),
                 Not(:repeat, :scheme) .=> mean .=> Not(:repeat, :scheme),
             )
+            mps[scheme].nprt = mps[scheme].nsire + mps[scheme].ndam
             tdf = combine(
                 groupby(grp, :grt),
                 Not(:repeat, :scheme, :grt, :nid) .=>
@@ -104,7 +106,7 @@ function xtrm(dat, col)
     ylm = begin
         t = extrema(x)
         d = t[2] - t[1]
-        (t[1] - 0.02d, t[2] + 0.02d)
+        (t[1] - 0.02d, t[2] + 0.05d)
     end
     ylm
 end
@@ -122,6 +124,35 @@ function ord_last(data, col)
         dt[i] = df[!, col][end]
     end
     ks = ks[sortperm(dt, rev = true)]
+end
+
+function fig_covdq(mpg, vpg, clr; c = 1)
+    ylm = xtrm(mpg, :covdq3)
+    ax, ay = -5, ylm[2] - 0.02(ylm[2] - ylm[1])
+    A, B, ch = c == 1 ? ("A: ", "B: ", L"C_1") : ("C: ", "D: ", L"C_{29}")
+    fs, n = [], length(mpg)
+    for i = 1:n
+        fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
+        ks = ord_last(mpg[i], :covdq3)
+        for s in ks
+            df = mpg[i][s]
+            plot!(
+                fig,
+                df.grt .- 5,
+                df.covdq3,
+                fillalpha = 0.2,
+                ribbon = vpg[i][s].covdq3,
+                label = uppercase(s[1:2]),
+                foreground_color_legend = nothing,
+                background_color_legend = nothing,
+                color = clr[s],
+            )
+        end
+        push!(fs, fig)
+    end
+    annotate!(fs[1], ax, ay, text(A * ch * L"F_{0.5\%}", 8, :left))
+    annotate!(fs[2], ax, ay, text(B * ch * L"F_{1\%}", 8, :left))
+    fs
 end
 
 """
@@ -165,7 +196,6 @@ function fig_mtbv(mpg, vpg, clr; c = 1)
     annotate!(fs[1], 2, p, text("$A: " * ch * L"F_{0.5\%}", 5))
     annotate!(fs[2], 15, 0, text("Generation", 10, :bottom))
     annotate!(fs[2], 2, p, text("$B: " * ch * L"F_{1\%}", 5))
-    plot(fs..., layout = (1, 2), size = (800, 400))
     fs
 end
 
@@ -957,9 +987,7 @@ function sup_fig(dir)
         savefig("fr-vs-fe.pdf")
         savefig("fr-vs-fe.png")
     end
-
-    return
-
+    
     begin # Figure of number of parents
         fs = fig_nprt(a, b, clr; p = 0, c = 1)
         append!(fs, fig_nprt(c, d, clr; p = 3, c = 2))
@@ -1014,6 +1042,19 @@ function sup_fig(dir)
         plot(fs..., layout = (2, 6), size = (800, 450))
         savefig("prp-fixed.pdf")
         savefig("prp-fixed.png")
+    end
+
+    begin
+        fs = fig_covdq(a, b, clr)
+        append!(fs, fig_covdq(c, d, clr; c = 2))
+        ylm = xtrm(a, :covdq3)
+        yx, yy = -12.3, ylm[2] - 0.25(ylm[2] - ylm[1])
+        annotate!(fs[1], yx, yy, text(L"\mathrm{Cov}(q_0, q_t)", 10, :top, rotation = 90))
+        ylm = xtrm(c, :covdq3)
+        annotate!(fs[4], 25, ylm[1] + 0.12(ylm[2] - ylm[1]), text("generation", 10, :top))
+        plot(fs..., layout = (2, 2), size = (800, 450))
+        savefig("covdq.pdf")
+        savefig("covdq.png")
     end
 
     begin # Evolution of allele frequency
