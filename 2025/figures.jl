@@ -158,7 +158,7 @@ end
 
 function fig_covdq(mpg, vpg, clr; c = 1)
     ylm = begin
-        t = xtrm(mpg, :covdq3)
+        t = xtrm(mpg, :covdq2)
         d = t[2] - t[1]
         (t[1] - 0.02d, t[2] + 0.05d)
     end
@@ -167,15 +167,15 @@ function fig_covdq(mpg, vpg, clr; c = 1)
     fs, n = [], length(mpg)
     for i = 1:n
         fig = plot(dpi = 300, ylim = ylm, size = (600, 400))
-        ks = ord_last(mpg[i], :covdq3)
+        ks = ord_last(mpg[i], :covdq2)
         for s in ks
             df = mpg[i][s]
             plot!(
                 fig,
                 df.grt .- 5,
-                df.covdq3,
+                df.covdq2,
                 fillalpha = 0.2,
-                ribbon = vpg[i][s].covdq3,
+                ribbon = vpg[i][s].covdq2,
                 label = uppercase(s[1:2]),
                 foreground_color_legend = nothing,
                 background_color_legend = nothing,
@@ -1303,15 +1303,15 @@ function sup_fig(dir)
     begin # Figure of covariance between q0 and qt
         fs = fig_covdq(a, b, clr)
         append!(fs, fig_covdq(c, d, clr; c = 2))
-        ylm = xtrm(a, :covdq3)
+        ylm = xtrm(a, :covdq2)
         yx, yy = -13.8, ylm[2] - 0.5(ylm[2] - ylm[1])
         annotate!(fs[1], yx, -0.37, text(L"\mathrm{Cov}(q_0, q_t)", 10, :top, rotation = 90))
         annotate!(fs[2], 15, -0.38, text("Generation", 9, :bottom))
         plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
         savefig("covdq.pdf")
         savefig("covdq.png")
-        plot!(fs[1], -5:30, m01.covdq3, ls = :dot, color = "black", label = "GB")
-        plot!(fs[3], -5:30, m29.covdq3, ls = :dot, color = "black", label = "GB")
+        plot!(fs[1], -5:30, m01.covdq2, ls = :dot, color = "black", label = "GB")
+        plot!(fs[3], -5:30, m29.covdq2, ls = :dot, color = "black", label = "GB")
         plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
         savefig("covdq+g.pdf")
         savefig("covdq+g.png")
@@ -1349,13 +1349,35 @@ function sup_fig(dir)
         savefig("qtl-frq-evo.png")
     end
 
-    begin # figure of breeding value vs. -log of inbreeding
+    begin # figure of breeding value vs. -log of homozygosity
         fs = fig_bv_logf(a, clr; c = 1)
         append!(fs, fig_bv_logf(c, clr; c = 2))
         annotate!(fs[1], -.045, -0.4, text("Breeding value", 9, :bottom, rotation = 90))
-        annotate!(fs[2], 0.27, -1.2, text(L"-\log(F_{\mathrm{IBD}})", 9, :bottom))
+        annotate!(fs[2], 0.27, -1.2, text(L"-\log(1 - F_{\mathrm{IBD}})", 9, :bottom))
         plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
         savefig("bv-logf.pdf")
         savefig("bv-logf.png")
     end
+end
+
+function newfig()
+    a, b = readSup("c01")
+    c, d = readSup("c29")
+    clr = line_clr(a[1]) # Assign a fixed color to each scheme
+    m01, m29, v01, v29 = readGB("gblup")
+
+    fs = fig_covdq(a, b, clr)
+    append!(fs, fig_covdq(c, d, clr; c = 2))
+    ylm = xtrm(a, :covdq2)
+    yx, yy = -13.8, ylm[2] - 0.5(ylm[2] - ylm[1])
+    annotate!(fs[1], yx, -0.37, text(L"\mathrm{Cov}(q_0, q_t)", 10, :top, rotation = 90))
+    annotate!(fs[2], 15, -0.38, text("Generation", 9, :bottom))
+    plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
+    savefig("covdq-ref.pdf")
+    savefig("covdq-ref.png")
+    plot!(fs[1], -5:30, m01.covdq2, ls = :dot, color = "black", label = "GB")
+    plot!(fs[3], -5:30, m29.covdq2, ls = :dot, color = "black", label = "GB")
+    plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
+    savefig("covdq+g-ref.pdf")
+    savefig("covdq+g-ref.png")
 end
