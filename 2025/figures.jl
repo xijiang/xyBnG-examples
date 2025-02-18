@@ -56,7 +56,7 @@ function readSup(dir)
     mpg, vpg = [], []
     for r in (r1, r2)
         r.nprt = r.nsire + r.ndam
-        r.logh = log.(1 .- r.fibd) * -1
+        r.logh = log.(1 .- r.iF) * -1
         mps = Dict{String,DataFrame}()
         vps = Dict{String,DataFrame}()
         nrpt = r.repeat[end]
@@ -81,8 +81,8 @@ function readSup(dir)
 end
 
 function readGB(dir)
-    c01 = deserialize("$dir/c01.ser")
-    c29 = deserialize("$dir/c29.ser")
+    c01 = deserialize("$dir/c01/summary.ser")
+    c29 = deserialize("$dir/c29/summary.ser")
     m01 = combine(
         groupby(c01, :grt),
         Not(:repeat, :scheme) .=> mean .=> Not(:repeat, :scheme),
@@ -443,7 +443,7 @@ defined in `clr`. Legends are in the top left corner.
 """
 function fig_inbreeding(mpg, vpg, clr; c = 1)
     ylm = begin
-        t = xtrm(mpg, :fibd)
+        t = xtrm(mpg, :iF)
         d = 0.01(t[2] - t[1])
         (t[1] - d, t[2] + 5d)
     end
@@ -459,15 +459,15 @@ function fig_inbreeding(mpg, vpg, clr; c = 1)
             legend = :outerright,
             legendfontsize = 6,
         )
-        ks = ord_last(mpg[i], :fibd)
+        ks = ord_last(mpg[i], :iF)
         for s in ks
             df = mpg[i][s]
             plot!(
                 fig,
                 df.grt .- 5,
-                df.fibd,
+                df.iF,
                 fillalpha = 0.2,
-                ribbon = vpg[i][s].fibd,
+                ribbon = vpg[i][s].iF,
                 label = uppercase(s[1:2]),
                 color = clr[s],
             )
@@ -836,7 +836,7 @@ function sum_frq_evo(clr, dir, file; cls = :chip)
             for k in keys(clr)
                 print(' ', k)
                 for i = 1:nrpt
-                    tag = lpad(i, ndigits(nrpt), '0')
+                    tag = lpad(i, 3, '0') #ndigits(nrpt), '0')
                     lmp = deserialize("$dir/$r/$tag-founder.lmp")
                     nlc = begin
                         read!("$dir/$r/$tag-$k.xy", ti)
@@ -1039,11 +1039,11 @@ function fig_frfe(mpg, clr; c = 1)
     for i = 1:2
         for k in keys(clr)
             m += 1
-            fibd = mpg[i][k].fibd
+            iF = mpg[i][k].iF
             nsir = mpg[i][k].nsire
             ndam = mpg[i][k].ndam
             for i = 7:35
-                fr = (fibd[i+1] - fibd[i]) / (1 - fibd[i])
+                fr = (iF[i+1] - iF[i]) / (1 - iF[i])
                 fe = 1 / 8nsir[i] + 1 / 8ndam[i]
                 fre[i-6, m] = fr / fe
             end
@@ -1106,9 +1106,9 @@ function fig_dbv_df(mpg, clr; c = 1)
         for k in keys(clr)
             m += 1
             mtbv = mpg[i][k].mtbv
-            fibd = mpg[i][k].fibd
+            iF = mpg[i][k].iF
             dbvf[:, m] =
-                (mtbv[8:36] - mtbv[7:35]) ./ (fibd[8:36] - fibd[7:35]) .* (1 .- fibd[7:35])
+                (mtbv[8:36] - mtbv[7:35]) ./ (iF[8:36] - iF[7:35]) .* (1 .- iF[7:35])
         end
     end
     ylm = extrema(dbvf) .* (0.90, 1.1)
@@ -1195,21 +1195,42 @@ function fig_bv_logf(mpg, clr; c = 1)
     fs
 end
 
+"""
+    function tbvdf()
+Plot dTBV/dF. Depricated.
+"""
+function tbvdf()
+    fs = fig_dbv_df(a, clr; c = 1)
+    append!(fs, fig_dbv_df(c, clr; c = 2))
+    annotate!(fs[1], -2.5, -8, text(L"\Delta\mathrm{TBV}/{\Delta F}", 8, :bottom, rotation = 90))
+    annotate!(fs[2], 18, -3, text("Generation", 8, :bottom))
+    plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
+    savefig("dbv-vs-df.pdf")
+    savefig("dbv-vs-df.png")
+end
+
+function covdq()
+end
+
+"""
+    function nprt()
+Plot the number of parents. Depricated.
+"""
+function nprt()
+    fs = fig_nprt(a, b, clr; p = 0, c = 1)
+    append!(fs, fig_nprt(c, d, clr; p = 3, c = 2))
+    annotate!(fs[1], -4.2, 0, text("Number of parents", 9, :bottom, rotation = 90))
+    annotate!(fs[2], 17, -5, text("Generation", 9, :bottom))
+    plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
+    savefig("nprt.pdf")
+    savefig("nprt.png")
+end
+
 function sup_fig(dir)
     a, b = readSup("$dir/c01")
     c, d = readSup("$dir/c29")
     clr = line_clr(a[1]) # Assign a fixed color to each scheme
-    m01, m29, v01, v29 = readGB("gblup")
-
-    begin # dTBV/dF
-        fs = fig_dbv_df(a, clr; c = 1)
-        append!(fs, fig_dbv_df(c, clr; c = 2))
-        annotate!(fs[1], -2.5, -8, text(L"\Delta\mathrm{TBV}/{\Delta F}", 8, :bottom, rotation = 90))
-        annotate!(fs[2], 18, -3, text("Generation", 8, :bottom))
-        plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
-        savefig("dbv-vs-df.pdf")
-        savefig("dbv-vs-df.png")
-    end
+    m01, m29, v01, v29 = readGB("$dir/gblup")
 
     #begin # F_r/F_e
     #    fs = fig_frfe(a, clr; c = 1)
@@ -1220,13 +1241,6 @@ function sup_fig(dir)
     #end
 
     begin # Figure of number of parents
-        fs = fig_nprt(a, b, clr; p = 0, c = 1)
-        append!(fs, fig_nprt(c, d, clr; p = 3, c = 2))
-        annotate!(fs[1], -4.2, 0, text("Number of parents", 9, :bottom, rotation = 90))
-        annotate!(fs[2], 17, -5, text("Generation", 9, :bottom))
-        plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
-        savefig("nprt.pdf")
-        savefig("nprt.png")
     end
 
     begin # Figure of mean total breeding value
