@@ -237,16 +237,12 @@ shaded areas are the standard errors. Each scheme is plotted in a fixed color
 defined in `clr`. The solid lines are the number of sires and the dashed lines
 are the number of dams. Legends are in two columns. They read column by column.
 """
-function fig_nprt(mpg, vpg, clr; p = 0, c = 1)
+function fig_nprt(mpg, vpg, clr; c = 1)
     fs, n, rg = [], length(mpg), 7:36
-    ylm = begin
-        t = xtrm(mpg, :nprt, rg)
-        d = 0.01(t[2] - t[1])
-        (t[1] - d, t[2] + 10d)
-    end
+    ylm = xtrm(mpg, :nprt, rg)
     A, B, ch = c == 1 ? ("A: ", "B: ", L"C_1") : ("C: ", "D: ", L"C_{29}")
     for i = 1:n
-        fig = plot(dpi = 300, ylim = ylm, legend = :outerright)
+        fig = plot(dpi = 300, ylim = ylm, legend = :outerbottomright)
         ks = ord_last(mpg[i], :nprt)
         for s in ks
             df = mpg[i][s]
@@ -265,8 +261,9 @@ function fig_nprt(mpg, vpg, clr; p = 0, c = 1)
         end
         push!(fs, fig)
     end
-    annotate!(fs[1], 5, ylm[2], text(A * ch * L"F_{0.5\%}", 8, :top))
-    annotate!(fs[2], 5, ylm[2], text(B * ch * L"F_{1\%}", 8, :top))
+    plot!(fs[1], title = A * ch * L"F_{0.5\%}", titleloc = :left, titlefontsize = 8)
+    plot!(fs[2], title = B * ch * L"F_{1\%}", titleloc = :left, titlefontsize = 8)
+    c ==2 && xlabel!(fs[2], "Generation")
     fs
 end
 
@@ -1217,8 +1214,8 @@ end
 Plot the number of parents. Depricated.
 """
 function nprt()
-    fs = fig_nprt(a, b, clr; p = 0, c = 1)
-    append!(fs, fig_nprt(c, d, clr; p = 3, c = 2))
+    fs = fig_nprt(a, b, clr; c = 1)
+    append!(fs, fig_nprt(c, d, clr; c = 2))
     annotate!(fs[1], -4.2, 0, text("Number of parents", 9, :bottom, rotation = 90))
     annotate!(fs[2], 17, -5, text("Generation", 9, :bottom))
     plot(fs..., layout = (2, 2), size = (800, 450), left_margin = 15px)
