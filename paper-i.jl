@@ -8,19 +8,6 @@ import xyBnG.xyTypes: Plan
 import xyBnG.xps: initPop, chkbase, ggocs, aaocs, iiocs, igocs, hgocs, hhocs, gblup
 import xyBnG.xps: F0A, F0G, F0I, F0H
 
-"""
-    function fhmlg(ped, xy)
-Calculate the mean F homozygosity of the generation.
-"""
-function fhmlg(ped, xy)
-    ped = deserialize(ped)
-    id = ped.id[ped.grt .== ped.grt[end]]
-    xy = xyBnG.XY.mapit(xy)
-    gt = isodd.(xy[:, 2id .- 1]) + isodd.(xy[:, 2id])
-    H = xyBnG.RS.grm(gt, p = ones(size(gt, 1)) * 0.5)
-    mean(H)/2
-end
-
 function paper_1_tk(bdir, dF, nrng, rst; nrpt = 100, ε = 1e-6)
     plan = Plan(25, 50, 200; mate = :random)
     plnb = Plan(75, 75, 200; mate = :random)
@@ -177,9 +164,8 @@ function paper_1_pg(chr, dF, nrng, rst; nrpt = 100)
             savesum(sumfile, summary)
         end
         for scheme in hocs
-            Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
-            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
+            scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0['h']; ε = ε)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
             savesum(sumfile, summary)
         end
@@ -258,6 +244,9 @@ function pge(chr, dF, nrng, rst; nrpt = 100)
         aaocs(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, F0)
         summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
         savesum(sumfile, summary)
+        ped = deserialize("$rst/$tag-rand.ped")
+        rxy = "$rst/$tag-rand.xy"
+        Fh = F0H(rxy, lmp, ped)
 
         for scheme in ocss
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
@@ -266,7 +255,6 @@ function pge(chr, dF, nrng, rst; nrpt = 100)
             savesum(sumfile, summary)
         end
         for scheme in hocs
-            Fh = fhmlg("$rst/$tag-rand.ped", "$rst/$tag-rand.xy")
             foo, bar = "$tag-rand", tag * '-' * string(scheme)
             scheme(rst, foo, bar, lmp, nsel, trait, fixed, plnb, dF, Fh; ε = ε)
             summary = xysum("$rst/$bar.ped", "$rst/$bar.xy", lmp, trait)
