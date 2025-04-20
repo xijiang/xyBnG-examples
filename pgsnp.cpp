@@ -11,6 +11,7 @@
  * 4. SNP output is haplotype majored, i.e., it's haplotype by haplotype
  * 5. Modification to include float mutation rate (2011-.
  * 6. Exclude MKL from Intel compilers, 2016. ===>2.0
+ * 7. Implemented stack size limit, 2025. ===>2.1
  *
  *                                       by Xijiang Yu, Dec. 5, 2010
  ******************************************************************************/
@@ -143,7 +144,7 @@ void ooput(ostream &oo, int *vec, map<int, int> ref) {
 
 int main(int argc, char *argv[]) {
     // Set stack size limit to 100000 KB
-    set_stack_size_limit(1000000 * 1024);
+    set_stack_size_limit(2000000 * 1024);
 
     if (argc != 5) {
         cerr << "Usage: " << argv[0] << " ne ng chr mr" << endl;
